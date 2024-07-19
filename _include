@@ -25,8 +25,8 @@
 #######################################
 # EXAMPLE: readVar IP "192.168.1.1" "What's the server IP?" 1 30
 function readVar {
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
-  if [ "$2" == "" ]; then echo "-- ERROR: arg 2 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- readVar ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$2" == "" ]; then echo "-- readVar ERROR: arg 2 was not found" ; return 1; fi
   # $1: Variable name
   # $2: Default value
   # $3: Message
@@ -56,8 +56,8 @@ function readVar {
 #######################################
 # EXAMPLE: readYesNoVar L2_SWITCH "y" "Are all nodes connected to a L2 switch? (entre y or n)" 1 30
 function readYesNoVar {
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
-  if [ "$2" == "" ]; then echo "-- ERROR: arg 2 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- readYesNoVar ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$2" == "" ]; then echo "-- readYesNoVar ERROR: arg 2 was not found" ; return 1; fi
   # $1: Variable name
   # $2: Default value
   # $3: Message
@@ -97,8 +97,8 @@ function readYesNoVar {
 #######################################
 # EXAMPLE: NODE_ARRAY_DEFAULT="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && readArrayVar NODE_ARRAY "Please entre kubernetes cluster's nodes IP addresses the first one is the master (seperate IPs with SPACE)" "$(IFS=' ' ; echo "$NODE_ARRAY_DEFAULT" )"
 function readArrayVar {
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
-  if [ "$2" == "" ]; then echo "-- ERROR: arg 2 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- readArrayVar ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$2" == "" ]; then echo "-- readArrayVar ERROR: arg 2 was not found" ; return 1; fi
   # $1: Variable name
   # $2: Message
   # $4: Default value
@@ -124,7 +124,7 @@ function readArrayVar {
 #######################################
 # EXAMPLE: NEXT_IP 192.168.1.99 1
 function NEXT_IP {
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- NEXT_IP ERROR: arg 1 was not found" ; return 1; fi
   IP="$1"
   for ((i = 0; i <= "$2"; i++)); do
     IP_HEX=$(printf '%.2X%.2X%.2X%.2X\n' `echo $IP | sed -e 's/\./ /g'`)
@@ -142,7 +142,7 @@ function NEXT_IP {
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && WAIT_ALL_NODES_ONLINE $NODE_ARRAY
 function WAIT_ALL_NODES_ONLINE {
   # $1 Array of servers
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- WAIT_ALL_NODES_ONLINE ERROR: arg 1 was not found" ; return 1; fi
   NODE_ARRAY="$1"
   echo "-- Waiting for all nodes to be online"
   for ((i = 0; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
@@ -163,7 +163,7 @@ function WAIT_ALL_NODES_ONLINE {
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && IS_ALL_NODES_ONLINE $NODE_ARRAY
 function IS_ALL_NODES_ONLINE {
   # $1 Array of servers
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- IS_ALL_NODES_ONLINE ERROR: arg 1 was not found" ; return 1; fi
   export NODE_ARRAY="$1"
   echo "-- Checking if all nodes are online"
   if [[ -z $NODE_ARRAY ]]; then
@@ -189,8 +189,8 @@ function IS_ALL_NODES_ONLINE {
 function RESTART_ALL_NODES {
   # $1 Array of servers
   # $2 Private key path
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
-  if [ "$2" == "" ]; then echo "-- ERROR: arg 2 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- RESTART_ALL_NODES ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$2" == "" ]; then echo "-- RESTART_ALL_NODES ERROR: arg 2 was not found" ; return 1; fi
   NODE_ARRAY="$1"
   PRIVATE_KEY="$2"
   for ((i = 1; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
@@ -206,15 +206,15 @@ function RESTART_ALL_NODES {
 
 #######################################
 #######################################
-######## FUNCTION sshCopyID ###########
+######## FUNCTION SSH_COPY_ID #########
 #######################################
 #######################################
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && SSH_COPY_ID $NODE_ARRAY "~/.ssh/id_rsa"
 function SSH_COPY_ID {
   # $1 Array of servers
   # $2 Private key path
-  if [ "$1" == "" ]; then echo "-- ERROR: arg 1 was not found" ; return 1; fi
-  if [ "$2" == "" ]; then echo "-- ERROR: arg 2 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then echo "-- SSH_COPY_ID ERROR: arg 1 was not found" ; return 1; fi
+  if [ "$2" == "" ]; then echo "-- SSH_COPY_ID ERROR: arg 2 was not found" ; return 1; fi
 
   NODE_ARRAY="$1"
   PRIVATE_KEY="$2"
