@@ -15,7 +15,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-. _include
+#
+# HOW TO:
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-toolkit | bash -s -- 10.10.1.10 127.16.0.10 master master.example.com
+
+source <(curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include)
 mkdir -p logs tmp bin
 LOG_FILE="$(pwd)/logs/$(date +"%Y_%m_%d_%I_%M_%p").log"
 shopt -s nocasematch
@@ -283,12 +287,6 @@ spec:
       ]
     }'
 EOF
-  ssh -i "$PRIVATE_KEY" $SSH_EXTRA_ARGS "$SSH_USERNAME"@"${NODE_ARRAY[0]}" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
-#!/bin/bash
-ip link show type bridge
-ip link show type veth
-bridge link show
-____EOF____
 }
 
 #######################################
@@ -602,36 +600,6 @@ ____EOF____
   fi
   echo "-- Uninstalling Network-Attachment-Definitions" >&3
   kubectl delete Network-Attachment-Definitions --all -A --grace-period=0 --force
-}
-
-
-
-#######################################
-#######################################
-########## FUNCTION deployAPP #########
-#######################################
-#######################################
-function deployAPP() {
-  if [ "$GW" == "" ]; then
-    VALUES+="--set 'workload.main.podSpec.annotations.k8s\.v1\.cni\.cncf\.io/networks=$NETWORK_ANNOTATION' --set TZ=$KUBE_TZ"
-  else
-    VALUES+="--set 'workload.main.podSpec.annotations.k8s\.v1\.cni\.cncf\.io/networks=[$NETWORK_ANNOTATION]' --set TZ=$KUBE_TZ"
-  fi
-  VALUES="${VALUES//$'\r'/}"
-  echo "csv raw $(($j - 1)) -- $CURRENT_APP: Deploying .." >&3
-  echo "with values: $VALUES"
-  echo
-  echo -n "-- kubecsv added the following values: "
-  echo "${VALUES//--set/$'\n# --set'}"
-  NEW_APP_RAW=true
-  APP_NAMESPACE="app-$CURRENT_APP"
-  CMD="helm upgrade --install $CURRENT_APP --namespace $APP_NAMESPACE --create-namespace oci://tccr.io/truecharts/$CURRENT_HELM_CHART $VALUES"
-  echo "-- Running command: $CMD"
-  eval "$CMD"
-  # echo "-- $CURRENT_APP is been deployed .." >&3
-  unset VALUES
-  unset NETWORK_ANNOTATION
-}
 }
 
 #######################################
@@ -1109,118 +1077,7 @@ function step4() {
 ##################################################################################
 function step5() {
   copyKubeconfig
-  NEW_APP_RAW=true
-  CURRENT_APP=""
-  CURRENT_HELM_CHART=""
-  j=1
-  while IFS="," read -r app_name helm_truechart storage_name storage_enabled storage_path storage_subPath storage_server storage_type storage_mountPath nw_master_nic nw_mac nw_address_with_subnet nw_gateway nw_dns1 nw_dns2 run_as_user run_as_group privileged extra_helm_values; do
-    if (($j > 1)) && [ "$app_name" != "$CURRENT_APP" ]; then
-      deployAPP
-    fi
-    CURRENT_APP=$app_name
-    CURRENT_HELM_CHART=$helm_truechart
-    APP_NAMESPACE="app-$CURRENT_APP"
-    if $NEW_APP_RAW; then
-      echo "csv raw $j -- $app_name: Building values  .."
-      kubectl create ns "$APP_NAMESPACE"
-      NEW_APP_RAW=false
-    fi
-    if [ "$storage_name" != "" ]; then
-      echo "csv raw $j -- $app_name: Adding storage configuration \"$storage_name\" to the values .."  >&3
-      if [ "$storage_enabled" != "" ]; then
-        VALUES+="--set persistence.$storage_name.enabled=$storage_enabled "
-      fi
-      if [ "$storage_path" != "" ]; then
-        VALUES+="--set persistence.$storage_name.path=\"$storage_path\" "
-      fi
-      if [ "$storage_subPath" != "" ]; then
-        VALUES+="--set persistence.$storage_name.subPath=\"$storage_subPath\" "
-      fi
-      if [ "$storage_server" != "" ]; then
-        VALUES+="--set persistence.$storage_name.server=\"$storage_server\" "
-      fi
-      if [ "$storage_type" != "" ]; then
-        VALUES+="--set persistence.$storage_name.type=\"$storage_type\" "
-      fi
-      if [ "$storage_mountPath" != "" ]; then
-        VALUES+="--set persistence.$storage_name.mountPath=\"$storage_mountPath\" "
-      fi
-    fi
-    if [ "$nw_master_nic" != "" ]; then
-      MAC=$nw_mac
-      MAC_REGEX="^([a-fA-F0-9]{2}:){5}[a-fA-F0-9]{2}$"
-      if ! [[ $MAC =~ $MAC_REGEX ]]; then MAC="$(printf '00:2F:60:%02X:%02X:%02X\n' $(shuf -i 0-99 -n 1) $(shuf -i 101-199 -n 1) $(shuf -i 201-256 -n 1))"; fi
-      export MASTER_NIC="$nw_master_nic"
-      export BRIDGE_NAME=cbr-${nw_master_nic//@/-}
-      export APP_NAMESPACE
-      export MAC
-      export DNS1=$nw_dns1
-      export DNS2=$nw_dns2
-      export GW=$nw_gateway
-      export IPCIDR=$nw_address_with_subnet
-      IP=$(echo "$IPCIDR" | cut -d'/' -f1)
-      kubectl delete network-attachment-definitions.k8s.cni.cncf.io "$BRIDGE_NAME" -n "$APP_NAMESPACE"
-      if [[ $IP =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
-        echo "csv raw $j -- $app_name: Adding STATIC IP ($nw_address_with_subnet) ($MAC) network configuration $nw_master_nic to the values .." >&3
-        createNetworkAttachmentDefinition_STATIC
-      else
-        echo "csv raw $j -- $app_name: Adding DHCP ($MAC) network configuration $nw_master_nic to the values .." >&3
-        createNetworkAttachmentDefinition_DHCP
-      fi
-      if [ "$GW" == "" ]; then
-        if [ "$NETWORK_ANNOTATION" == "" ]; then
-          NETWORK_ANNOTATION="$BRIDGE_NAME"
-        else
-          NETWORK_ANNOTATION+="\,$BRIDGE_NAME"
-        fi
-      else
-        if [ "$NETWORK_ANNOTATION" == "" ]; then
-          NETWORK_ANNOTATION="{\"name\": \"$BRIDGE_NAME\"\,\"default-route\": [\"$GW\"]}"
-        else
-          NETWORK_ANNOTATION+=",{\"name\": \"$BRIDGE_NAME\"\,\"default-route\": [\"$GW\"]}"
-        fi
-        if [ "$DNS1" == "" ]; then setDNS1; DNS1=$COREDNS_DNS1; fi
-        if [ "$DNS2" == "" ]; then setDNS2; DNS2=$COREDNS_DNS2; fi
-      fi
-      if [ "$DNS1" != "" ] || [ "$DNS2" != "" ]; then
-        echo "csv raw $j -- $app_name: Adding dnsPolicy=ClusterFirstWithHostNet to the values .." >&3
-        VALUES+="--set workload.main.podSpec.dnsPolicy=ClusterFirstWithHostNet "
-        VALUES+="--set podOptions.dnsPolicy=ClusterFirstWithHostNet "
-        if [ "$DNS1" != "" ]; then
-          echo "csv raw $j -- $app_name: Adding DNS1=$DNS1 to the values .." >&3
-          VALUES+="--set workload.main.podSpec.dnsConfig.nameservers[0]=\"$DNS1\" "
-        fi
-        if [ "$DNS2" != "" ]; then
-           echo "csv raw $j -- $app_name: Adding DNS2=$DNS2 to the values .." >&3
-          VALUES+="--set workload.main.podSpec.dnsConfig.nameservers[1]=\"$DNS2\" "
-        fi
-      fi
-    fi
-    if [ "$run_as_user" != "" ]; then
-      echo "csv raw $j -- $app_name: Adding runAsUser: $run_as_user to the values .." >&3
-      VALUES+="--set securityContext.container.runAsUser=$run_as_user "
-      VALUES+="--set securityContext.container.PUID=$run_as_user "
-    fi
-    if [ "$run_as_group" != "" ]; then
-      echo "csv raw $j -- $app_name: Adding runAsGroup: $run_as_group to the values .." >&3
-      VALUES+="--set securityContext.container.runAsGroup=$run_as_group "
-      VALUES+="--set securityContext.pod.fsGroup=$run_as_group "
-    fi
-    if [ "$privileged" != "" ]; then
-      echo "csv raw $j -- $app_name: Adding privileged: $privileged to the values .." >&3
-      VALUES+="--set securityContext.container.privileged=$privileged "
-      VALUES+="--set securityContext.container.UMASK=000 "
-      VALUES+="--set securityContext.container.runAsNonRoot=false "
-      VALUES+="--set securityContext.container.readOnlyRootFilesystem=false "
-    fi
-    if [ "$extra_helm_values" != "" ]; then
-      echo "csv raw $j -- $app_name: Adding extra values: $extra_helm_values .." >&3
-      VALUES+="$extra_helm_values "
-    fi
-    j=$(($j + 1))
-  done < <(tail -n +2 deploy.csv)
-  deployAPP
-  echo "---------------------------------------------------------------" >&3
+  curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/kubecsv/main/kubecsv | bash -s
 }
 
 ##################################################################################

@@ -15,7 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
+# HOW TO:
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-update-CC1352P2-CC2652P.sh | bash -s -- 192.168.0.2
 # $1 Adaptor IP
 ADAPTOR_IP=$1

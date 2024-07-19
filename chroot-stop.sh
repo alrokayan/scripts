@@ -15,7 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
+# HOW TO:
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/chroot-stop.sh | bash -s
 ROOTFS_PARENT_FOLDER=/root
 umount -l $ROOTFS_PARENT_FOLDER/rootfs/dev

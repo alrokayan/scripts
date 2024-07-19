@@ -15,7 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
+# HOW TO:
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/chroot-install.sh | bash -s
 ISO_SR=/run/sr-mount/d6818f51-40ac-b1f3-cd6c-d658d9e4fd21
 ROOTFS_PARENT_FOLDER=/root

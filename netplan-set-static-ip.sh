@@ -15,7 +15,8 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
+# HOW TO:
 # curl https://raw.githubusercontent.com/alrokayan/scripts/main/netplan-set-static-ip.sh | bash -s
 ip a | grep ": "
 echo "Enter your network card name (Default: eth0): "

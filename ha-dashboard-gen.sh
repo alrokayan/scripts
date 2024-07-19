@@ -15,12 +15,11 @@
 # KIND, either express or implied.  See the License for the
 # specific language governing permissions and limitations
 # under the License.
-
+#
+# HOW TO:
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-dashboard-gen.sh | bash -s
-
 DASHBAORD="MAJED"
 ROOMS=("GF Living" "Dining" "Daily Seating" "Main Kitchen" "Open Kitchen" "F1" "Master" "Room" "F2" "Playroom" "Maid" "Outdoor")
-
 echo "title: $DASHBAORD
 views:
   - type: sections
@@ -52,7 +51,6 @@ for r in "${ROOMS[@]}"; do
             show_empty: true
         title: $r" >> $DASHBAORD.yaml                
 done
-
 echo '      - type: grid
         cards:
           - type: custom:auto-entities
@@ -62,13 +60,10 @@ echo '      - type: grid
                   not:
                     name: ""
                   and:' >> $DASHBAORD.yaml
-
-
 for r in "${ROOMS[@]}"; do
     echo "                    - not:
                         name: $r*" >> $DASHBAORD.yaml
 done
-
 echo "            card:
               type: entities
               state_color: true
@@ -180,7 +175,6 @@ echo "            card:
     title: Battries
     path: battries
     cards:" >> $DASHBAORD.yaml
-
 for r in "${ROOMS[@]}"; do
     echo "      - type: custom:auto-entities
         filter:
@@ -193,18 +187,15 @@ for r in "${ROOMS[@]}"; do
           title: $r
         show_empty: true" >> $DASHBAORD.yaml
 done
-
 echo '      - type: custom:auto-entities
         filter:
           include:
             - entity_id: "*battery*"
               and:' >> $DASHBAORD.yaml
-
 for r in "${ROOMS[@]}"; do
     echo "                - not:
                     name: $r*" >> $DASHBAORD.yaml
 done
-
 echo '        show_empty: true
         card:
           type: custom:fold-entity-row
