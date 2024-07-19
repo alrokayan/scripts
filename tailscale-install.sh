@@ -7,6 +7,7 @@ sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/
 sysctl -p /etc/sysctl.conf
 ip link delete tailscale0
 systemctl enable --now tailscaled
+systemctl status tailscaled
 tailscale up \
        --accept-dns=false \
        --advertise-exit-node=false \
