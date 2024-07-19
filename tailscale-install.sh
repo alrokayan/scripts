@@ -12,5 +12,6 @@ tailscale up \
        --accept-dns=false \
        --advertise-exit-node=false \
        --authkey="$1" \
+       --accept-routes=true \
        --reset
 # tailscale funnel --bg http://127.0.0.1
