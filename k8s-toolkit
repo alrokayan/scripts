@@ -1072,7 +1072,7 @@ function step4() {
 ##################################################################################
 function step5() {
   copyKubeconfig
-  curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/kubecsv/main/kubecsv | bash -s
+  curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/kubecsv/main/kubecsv | bash -s -- deploy.csv
 }
 
 ##################################################################################

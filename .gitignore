@@ -1,3 +1,4 @@
+.env
 /.DS_Store
 *.csv
 logs
@@ -9,4 +10,3 @@ kubeconfig
 .nfs*
 NOTES.md
 /*.BACKUP
-.env
