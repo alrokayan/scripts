@@ -3,11 +3,10 @@
 # $1 = NFS server address
 # $2 = NFS path
 # $3 = Local mount point
-SYSTEMD_REMOVE_NFS_MOUNT "$3"
 SYSTEMD_ESCAPED_MOINT_POINT=$(systemd-escape --path "$3")
 echo "-- Mounting: $1:$2 on $3 ($SYSTEMD_ESCAPED_MOINT_POINT)" >&3
 mkdir -p "$3"
-cat >/etc/systemd/system/"$SYSTEMD_ESCAPED_MOINT_POINT".mount <<EOF
+cat >/etc/systemd/system/$SYSTEMD_ESCAPED_MOINT_POINT.mount <<EOF
 [Unit]
 Description=Mount $2
 Requires=rpcbind.service network-online.target
@@ -27,5 +26,6 @@ TimeoutSec=30
 WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
-systemctl enable "$SYSTEMD_ESCAPED_MOINT_POINT".mount
-systemctl start "$SYSTEMD_ESCAPED_MOINT_POINT".mount
+systemctl enable $SYSTEMD_ESCAPED_MOINT_POINT.mount
+systemctl start $SYSTEMD_ESCAPED_MOINT_POINT.mount
+systemctl status $SYSTEMD_ESCAPED_MOINT_POINT.mount
