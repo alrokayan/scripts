@@ -19,12 +19,12 @@
 # HOW TO:
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-toolkit | bash -s -- 10.10.1.10 127.16.0.10 master master.example.com
 
-source <(curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include)
 mkdir -p logs tmp bin
 LOG_FILE="$(pwd)/logs/$(date +"%Y_%m_%d_%I_%M_%p").log"
 shopt -s nocasematch
 exec 3>&1 1>>"$LOG_FILE" 2>&1
 trap "echo 'ERROR: An error occurred during execution, check log $LOG_FILE for details.' >&3"
+source <(curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include)
 touch .env
 export PATH="$(pwd)/bin:$PATH"
 if ! cat .env | grep "export SSH_EXTRA_ARGS="; then
