@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-export-tailscale-certs.sh | bash -s -- /docker-volumes/tailscale /certs
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-export-tailscale-certs.sh | bash -s -- /docker-volumes/tailscale /certs
 # $1 Path to tailscale volume
 # $2 Path to save certs on
 wget https://github.com/stedolan/jq/releases/download/jq-1.5/jq-linux64 -O jq 

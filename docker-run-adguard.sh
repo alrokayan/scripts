@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-run-adguard.sh | bash -s -- /docker-volumes/adguard
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-run-adguard.sh | bash -s -- /docker-volumes/adguard
 # $1 Volume path
 docker rm -f adguard
 docker run -d \

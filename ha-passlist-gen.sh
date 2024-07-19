@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/ha-passlist-gen.sh | bash -s
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-passlist-gen.sh | bash -s
 
 NODERED_PATH="/volume1/data/docker-volumes/node-red/data"
 ZIGBEE2MQTT_PATH="/volume1/data/kube-volumes/zigbee2mqtt"

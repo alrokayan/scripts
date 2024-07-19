@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-wipe.sh | bash -s -- /dev/sdb
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-wipe.sh | bash -s -- /dev/sdb
 # $1 Disk to wipe, xfs formate, and mount
 DISK=$1
 systemctl stop iptables

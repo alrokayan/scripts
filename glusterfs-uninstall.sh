@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-uninstall.sh | bash -s
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-uninstall.sh | bash -s
 umount /gfs
 sed -i '/glusterfs/d' /etc/fstab
 apt remove glusterfs-client -y

@@ -1,5 +1,5 @@
 #! /bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-create-subnet.env.sh | bash -s -- 10.244 0
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-create-subnet.env.sh | bash -s -- 10.244 0
 # $1 First and second octet
 # $2 Third octet
 mkdir -p /run/flannel

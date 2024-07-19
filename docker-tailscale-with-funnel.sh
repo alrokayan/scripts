@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-tailscale-with-funnel.sh | bash -s -- AUTHKEY 8123
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-tailscale-with-funnel.sh | bash -s -- AUTHKEY 8123
 # $1 Tailscale authkey
 # $2 Port to funnel
 docker stop tailscale

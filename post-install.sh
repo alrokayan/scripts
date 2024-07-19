@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/post-install.sh | bash -s
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/post-install.sh | bash -s
 apt update -y
 apt upgrade -y
 apt autoclean -y

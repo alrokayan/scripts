@@ -1,5 +1,5 @@
 #!/bin/bash
-# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/ha-update-CC1352P2-CC2652P.sh | bash -s -- 192.168.0.2
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-update-CC1352P2-CC2652P.sh | bash -s -- 192.168.0.2
 # $1 Adaptor IP
 ADAPTOR_IP=$1
 ADAPTOR_PORT=6638
