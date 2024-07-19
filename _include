@@ -1,0 +1,213 @@
+#!/bin/bash
+#######################################
+#######################################
+########## FUNCTION readVar ###########
+#######################################
+#######################################
+# EXAMPLE: readVar IP "192.168.1.1" "What's the server IP?" 1 30
+function readVar() {
+  # $1: Variable name
+  # $2: Default value
+  # $3: Message
+  # $4: Skip if variable is not empty (send any character to skip)
+  # $5: timeout
+  if [[ -z ${!1} ]] || [[ -z $4 ]]; then
+    [[ -z ${!1} ]] && eval "export $1=$2"
+    if [[ -z $5 ]]; then
+      echo ">> $3: (Default: ${!1})" >&3
+      read -r INPUT
+    else
+      echo ">> $3: (Default: ${!1}) [TIMEOUT: ${5}s]" >&3
+      read -t $5 -r INPUT
+    fi
+    [[ $INPUT != "" ]] && eval "export $1=$INPUT"
+  else
+    eval "export $1=${!1}"
+  fi
+  sed -i.BACKUP "/^export $1=/d" .env
+  echo "export $1=\"${!1}\"" >>.env
+}
+
+#######################################
+#######################################
+####### FUNCTION readYesNoVar #########
+#######################################
+#######################################
+# EXAMPLE: readYesNoVar L2_SWITCH "y" "Are all nodes connected to a L2 switch? (entre y or n)" 1 30
+function readYesNoVar() {
+  # $1: Variable name
+  # $2: Default value
+  # $3: Message
+  # $4: Skip if variable is not empty (send any character to skip)
+  # $5: timeout
+  if [[ -z ${!1} ]] || [[ -z $4 ]]; then
+    [[ -z ${!1} ]] && eval "export $1=$2"
+    if [[ -z $5 ]]; then
+      echo ">> $3: (Default: ${!1})" >&3
+      read -r INPUT
+      if [[ "$INPUT" =~ "y" ]]; then
+        INPUT="y"
+      else
+        INPUT="n"
+      fi
+    else
+      echo ">> $3: (Default: ${!1}) [TIMEOUT: ${5}s]" >&3
+      read -t $5 -r INPUT
+      if [[ "$INPUT" =~ "y" ]]; then
+        INPUT="y"
+      else
+        INPUT="n"
+      fi
+    fi
+    [[ $INPUT != "" ]] && eval "export $1=$INPUT"
+  else
+    eval "export $1=${!1}"
+  fi
+  sed -i.BACKUP "/^export $1=/d" .env
+  echo "export $1=\"${!1}\"" >>.env
+}
+
+#######################################
+#######################################
+##### FUNCTION readArrayVar ###########
+#######################################
+#######################################
+# EXAMPLE: NODE_ARRAY_DEFAULT="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && readArrayVar NODE_ARRAY "Please entre kubernetes cluster's nodes IP addresses the first one is the master (seperate IPs with SPACE)" "$(IFS=' ' ; echo "$NODE_ARRAY_DEFAULT" )"
+function readArrayVar() {
+  # $1: Variable name
+  # $2: Message
+  # $4: Default value
+  # $3: Skip if variable is not empty (send any character to skip)
+  if [[ -z ${!1} ]] || [[ -z $4 ]]; then
+    echo ">> $2: (Default: $3)" >&3
+    read -r INPUT
+    if [[ $INPUT != "" ]]; then
+      sed -i.BACKUP "/^export $1=/d" .env
+      echo "export $1=($INPUT)" >>.env
+    else
+      sed -i.BACKUP "/^export $1=/d" .env
+      echo "export $1=($3)" >>.env
+    fi
+  fi
+  . .env
+}
+
+#######################################
+#######################################
+######## FUNCTION NEXT_IP #############
+#######################################
+#######################################
+# EXAMPLE: NEXT_IP 192.168.1.99 1
+function NEXT_IP() {
+  IP=$1
+  for ((i = 0; i <= $2; i++)); do
+    IP_HEX=$(printf '%.2X%.2X%.2X%.2X\n' `echo $IP | sed -e 's/\./ /g'`)
+    NEXT_IP_HEX=$(printf %.8X `echo $(( 0x$IP_HEX + 1 ))`)
+    IP=$(printf '%d.%d.%d.%d\n' `echo $NEXT_IP_HEX | sed -r 's/(..)/0x\1 /g'`)
+  done
+  echo "$IP"
+}
+
+#######################################
+#######################################
+### FUNCTION WAIT_ALL_NODES_ONLINE ####
+#######################################
+#######################################
+# EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && WAIT_ALL_NODES_ONLINE $NODE_ARRAY
+function WAIT_ALL_NODES_ONLINE() {
+  # $1 Array of servers
+  NODE_ARRAY=$1
+  echo "-- Waiting for all nodes to be online" >&3
+  for ((i = 0; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
+    host="${NODE_ARRAY[$i]}"
+    while ! ping -c1 $host &>/dev/null; do
+      echo "-- Waiting for $host to be online" >&3
+      sleep 5
+    done
+    echo "-- $host is online" >&3
+  done
+}
+
+#######################################
+#######################################
+### FUNCTION IS_ALL_NODES_ONLINE ######
+#######################################
+#######################################
+# EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && IS_ALL_NODES_ONLINE $NODE_ARRAY
+function IS_ALL_NODES_ONLINE() {
+  # $1 Array of servers
+  NODE_ARRAY=$1
+  echo "-- Checking if all nodes are online" >&3
+  if [[ -z $NODE_ARRAY ]]; then
+    echo "-- NODE_ARRAY is not set" >&3
+    return 1
+  fi
+  for ((i = 0; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
+    host="${NODE_ARRAY[$i]}"
+    if ! ping -c1 "$host" &>/dev/null; then
+      echo "-- $host is offline" >&3
+      return 1
+    fi
+  done
+  return 0
+}
+
+#######################################
+#######################################
+###### FUNCTION RESTART_ALL_NODES #####
+#######################################
+#######################################
+# EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && RESTART_ALL_NODES $NODE_ARRAY "~/.ssh/id_rsa"
+function RESTART_ALL_NODES() {
+  # $1 Array of servers
+  # $2 Private key path
+  NODE_ARRAY=$1
+  PRIVATE_KEY=$2
+  for ((i = 1; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
+    echo "-- Rebooting ${NODE_ARRAY[$i]}"
+    (ssh -i "$PRIVATE_KEY" $SSH_EXTRA_ARGS "$SSH_USERNAME"@"${NODE_ARRAY[$i]}" "reboot") &
+  done
+  wait
+  echo "-- Rebooting ${NODE_ARRAY[0]}"
+  ssh -i "$PRIVATE_KEY" $SSH_EXTRA_ARGS "$SSH_USERNAME"@"${NODE_ARRAY[0]}" "reboot"
+  sleep 10
+  WAIT_ALL_NODES_ONLINE $NODE_ARRAY
+}
+
+#######################################
+#######################################
+######## FUNCTION sshCopyID ###########
+#######################################
+#######################################
+# EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && SSH_COPY_ID $NODE_ARRAY "~/.ssh/id_rsa"
+function SSH_COPY_ID() {
+  # $1 Array of servers
+  # $2 Private key path
+  NODE_ARRAY=$1
+  PRIVATE_KEY=$2
+  if [ "$PRIVATE_KEY" == "" ]; then echo "-- ERROR: PRIVATE_KEY is empty " >&3 ; return 1; fi
+
+  if [ ! -f $PRIVATE_KEY ]; then
+    echo "-- $PRIVATE_KEY not found. Generating new keys" >&3
+    mkdir -p "$(dirname $PRIVATE_KEY)"
+    ssh-keygen -t rsa -b 4096 -C "k8s" -f "$PRIVATE_KEY" -N ""
+  else
+    echo "-- Using $PRIVATE_KEY" >&3
+  fi
+  chmod 700 "$(dirname $PRIVATE_KEY)"
+  chmod 600 "$PRIVATE_KEY"
+  chmod 644 "$PRIVATE_KEY.pub"
+  echo "PUBLIC KEY: "
+  cat "$PRIVATE_KEY.pub"
+
+  WAIT_ALL_NODES_ONLINE $NODE_ARRAY
+  for ((i = 0; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
+    IP=${NODE_ARRAY[$i]}
+    echo "-- copying public key to $IP " >&3
+    ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$IP"
+    mkdir -p ~/.ssh
+    chmod 700 ~/.ssh
+    ssh-copy-id -o LogLevel=QUIET -i "$PRIVATE_KEY" $SSH_EXTRA_ARGS "$SSH_USERNAME"@"$IP" 1>&3
+  done
+  return 0
+}
