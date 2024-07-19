@@ -1,5 +1,12 @@
-logs/*
-bin/*
-tmp/*
+/.DS_Store
+*.csv
+logs
+tmp
+bin
+.ssh
+.env.BACKUP
+kubeconfig
+.nfs*
+NOTES.md
+/*.BACKUP
 .env
-*.BACKUP
