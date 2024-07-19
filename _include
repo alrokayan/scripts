@@ -24,7 +24,7 @@
 #######################################
 #######################################
 # EXAMPLE: readVar IP "192.168.1.1" "What's the server IP?" 1 30
-function readVar() {
+function readVar {
   # $1: Variable name
   # $2: Default value
   # $3: Message
@@ -53,7 +53,7 @@ function readVar() {
 #######################################
 #######################################
 # EXAMPLE: readYesNoVar L2_SWITCH "y" "Are all nodes connected to a L2 switch? (entre y or n)" 1 30
-function readYesNoVar() {
+function readYesNoVar {
   # $1: Variable name
   # $2: Default value
   # $3: Message
@@ -92,7 +92,7 @@ function readYesNoVar() {
 #######################################
 #######################################
 # EXAMPLE: NODE_ARRAY_DEFAULT="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && readArrayVar NODE_ARRAY "Please entre kubernetes cluster's nodes IP addresses the first one is the master (seperate IPs with SPACE)" "$(IFS=' ' ; echo "$NODE_ARRAY_DEFAULT" )"
-function readArrayVar() {
+function readArrayVar {
   # $1: Variable name
   # $2: Message
   # $4: Default value
@@ -117,7 +117,7 @@ function readArrayVar() {
 #######################################
 #######################################
 # EXAMPLE: NEXT_IP 192.168.1.99 1
-function NEXT_IP() {
+function NEXT_IP {
   IP=$1
   for ((i = 0; i <= $2; i++)); do
     IP_HEX=$(printf '%.2X%.2X%.2X%.2X\n' `echo $IP | sed -e 's/\./ /g'`)
@@ -133,7 +133,7 @@ function NEXT_IP() {
 #######################################
 #######################################
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && WAIT_ALL_NODES_ONLINE $NODE_ARRAY
-function WAIT_ALL_NODES_ONLINE() {
+function WAIT_ALL_NODES_ONLINE {
   # $1 Array of servers
   NODE_ARRAY=$1
   echo "-- Waiting for all nodes to be online"#  >&3
@@ -153,10 +153,10 @@ function WAIT_ALL_NODES_ONLINE() {
 #######################################
 #######################################
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && IS_ALL_NODES_ONLINE $NODE_ARRAY
-function IS_ALL_NODES_ONLINE() {
+function IS_ALL_NODES_ONLINE {
   # $1 Array of servers
   if [ $1 == "" ]; then return 1; fi
-  NODE_ARRAY=$1
+  export NODE_ARRAY=$1
   echo "-- Checking if all nodes are online"#  >&3
   if [[ -z $NODE_ARRAY ]]; then
     echo "-- NODE_ARRAY is not set"#  >&3
@@ -178,7 +178,7 @@ function IS_ALL_NODES_ONLINE() {
 #######################################
 #######################################
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && RESTART_ALL_NODES $NODE_ARRAY "~/.ssh/id_rsa"
-function RESTART_ALL_NODES() {
+function RESTART_ALL_NODES {
   # $1 Array of servers
   # $2 Private key path
   NODE_ARRAY=$1
@@ -200,7 +200,7 @@ function RESTART_ALL_NODES() {
 #######################################
 #######################################
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && SSH_COPY_ID $NODE_ARRAY "~/.ssh/id_rsa"
-function SSH_COPY_ID() {
+function SSH_COPY_ID {
   # $1 Array of servers
   # $2 Private key path
   NODE_ARRAY=$1
