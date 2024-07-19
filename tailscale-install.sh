@@ -5,7 +5,7 @@ curl -fsSL https://tailscale.com/install.sh | sh
 sed -i '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
 sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf
 sysctl -p /etc/sysctl.conf
-ip link delete tailscale0
+# ip link delete tailscale0
 systemctl enable --now tailscaled
 systemctl status tailscaled
 tailscale up \
