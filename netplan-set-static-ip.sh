@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl https://raw.githubusercontent.com/alrokayan/scripts/main/netplan-set-static-ip.sh | bash -s
 ip a | grep ": "
 echo "Enter your network card name (Default: eth0): "
 read NIC

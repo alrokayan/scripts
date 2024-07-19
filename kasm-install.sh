@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/kasm-install.sh | bash -s -- PASSWORD
 # $1 Password
 export KASM_UID=$(id kasm -u)
 export KASM_GID=$(id kasm -g)

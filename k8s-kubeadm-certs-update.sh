@@ -1,4 +1,5 @@
 #!/bin/sh
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-kubeadm-certs-update.sh | bash -s -- 10.10.1.10 127.16.0.10 master master.example.com
 # $1 Main IP
 # $2 Extra IP/SAN
 # $3 Extra IP/SAN

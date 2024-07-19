@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-install.sh | bash -s -- 192.168.0.2 192.168.0.3 192.168.0.4
 # $1 Server1 IP
 # $2 Server2 IP
 # $3 Server3 IP

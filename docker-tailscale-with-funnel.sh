@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-tailscale-with-funnel.sh | bash -s -- AUTHKEY 8123
 # $1 Tailscale authkey
 # $2 Port to funnel
 docker stop tailscale

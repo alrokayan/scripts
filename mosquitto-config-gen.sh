@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/mosquitto-config-gen.sh | bash -s -- /mnt/nvme/kube-volumes/mosquitto
 # $1 Path
 mkdir -p $1
 echo 'persistence true

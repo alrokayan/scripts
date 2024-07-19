@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl https://raw.githubusercontent.com/alrokayan/scripts/main/tailscale-install.sh | bash -s -- AUTHKEY
 # $1 Tailscale authkey
 curl -fsSL https://tailscale.com/install.sh | sh
 sed -i '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf

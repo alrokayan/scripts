@@ -1,10 +1,10 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/disk-test.sh | bash -s -- /mnt /root
 # $1 Path to test
 # $2 Path to save
 TESTRESULTS_FOLDER="$2/Disk-Test-Results/$(date +%Y_%m_%d_%H_%M)/"
 TEST_LOCATIONS=$1
 mkdir -p $TESTRESULTS_FOLDER
-
 for i in "${TEST_LOCATIONS[@]}"; do
     echo "Testing /mnt/$i ..."
     (
@@ -25,7 +25,6 @@ for i in "${TEST_LOCATIONS[@]}"; do
     cat $TESTRESULTS_FOLDER$TESTRESULT_FILE | grep -e READ -e WRITE >> $TESTRESULTS_FOLDER/SUMMARY.txt
     ) &
 done
-
 echo "
 ##############################
 ########## SUMNMARY ##########

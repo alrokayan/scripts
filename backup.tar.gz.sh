@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/backup.tar.gz.sh | bash -s -- /mnt/hdd/Backups /mnt/nvme/kube-volumes
 # $1 Backup folder path
 # $2 Target path to backup
 DATE_FOLDER=$(date +%Y_%m_%d)

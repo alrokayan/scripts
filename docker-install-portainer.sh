@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-install-portainer.sh | bash -s -- /docker-volumes/portainer
 # $1 Volume Path
 docker rm -f portainer
 docker run -d \

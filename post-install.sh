@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/post-install.sh | bash -s
 apt update -y
 apt upgrade -y
 apt autoclean -y

@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/hostname.sh | bash -s -- NEWHOSTNAME
 # $1 New hostname
 old_hostname=$(cat /etc/hostname)
 hostnamectl --no-ask-password hostname $1

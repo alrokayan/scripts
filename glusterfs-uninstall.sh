@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-uninstall.sh | bash -s
 umount /gfs
 sed -i '/glusterfs/d' /etc/fstab
 apt remove glusterfs-client -y

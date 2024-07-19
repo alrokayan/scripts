@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-run-codeserver.sh | bash -s -- /docker-volumes/code-server PASSWORD example.com
 # $1 Volume path
 # $2 Password
 # $3 Proxy domain

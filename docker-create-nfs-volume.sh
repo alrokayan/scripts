@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/docker-create-nfs-volume.sh | bash -s -- 10.0.0.1 /mnt/hdd/Nextcloud nextcloud
 # $1 NFS SERVER
 # $2 PATH
 # $3 NAME

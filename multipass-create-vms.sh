@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/multipass-create-vms.sh | bash -s -- ubuntu 00:14:51:3C:84:F1 eno0 /Users/USER/Nextcloud /nextcloud 2 2 64
 # $1 Hostname
 # $2 Mac
 # $3 NIC

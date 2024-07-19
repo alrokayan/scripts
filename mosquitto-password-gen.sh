@@ -1,4 +1,5 @@
 #!/bin/bash
+# curl -fL https://raw.githubusercontent.com/alrokayan/scripts/main/mosquitto-password-gen.sh | bash -s -- /mnt/nvme/kube-volumes/mosquitto USERNAME PASSWORD
 # $1 Path to mosquitto config/data volume
 # $2 username
 # $3 password
