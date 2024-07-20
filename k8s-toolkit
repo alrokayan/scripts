@@ -967,9 +967,9 @@ function step3() {
     kubectl label --overwrite ns kube-network pod-security.kubernetes.io/enforce=privileged
 
     echo "-- Creating subnet.env and downloading cni binaries on all nodes" 
+    i=0
     for IP in "${NODE_ARRAY[@]}"; do
-      (
-      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" bash <<'____EOF____'
+      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" i="$i" bash <<'____EOF____'
 #!/bin/bash
 
 echo "-- $HOSTNAME: Creating subnet.env"
@@ -987,7 +987,7 @@ mkdir -p /opt/cni/bin
 curl -s -L "https://github.com/containernetworking/plugins/releases/download/v1.5.0/cni-plugins-linux-$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)"-v1.5.0.tgz | tar xzf - -C /opt/cni/bin
 chown -R "$(id -un)":"$(id -gn)" /opt/cni
 ____EOF____
-      ) &
+      i++
     done
     wait
     
