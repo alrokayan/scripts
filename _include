@@ -257,7 +257,7 @@ function SSH_COPY_ID {
     ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$IP"
     mkdir -p ~/.ssh
     chmod 700 ~/.ssh
-    ssh-copy-id -o LogLevel=QUIET -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" 1>&3
+    ssh-copy-id -o LogLevel=QUIET -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP"
   done
   return 0
 }
