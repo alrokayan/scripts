@@ -26,8 +26,6 @@ if ! [ -f .env ]; then touch .env; fi
 chmod +x _include .env
 mkdir -p tmp bin
 . _include
-SCRIPT_PATH="$(pwd)/bin"
-export PATH="$SCRIPT_PATH:$PATH"
 if ! grep "export SSH_EXTRA_ARGS=" .env; then
   echo 'export SSH_EXTRA_ARGS="-o StrictHostKeyChecking=no"' >> .env
 fi
@@ -361,34 +359,30 @@ function binInstall() {
     else
       echo "-- OS: Linux - CHECKING BINARIES" 
     fi
-    if ! command -v helm &> /dev/null || ! [ -f bin/helm ] || $force_install_bin; then
-      rm -f bin/helm
+    if ! command -v helm &> /dev/null || $force_install_bin; then
       curl -L https://get.helm.sh/helm-v3.15.2-linux-"$(dpkg --print-architecture)".tar.gz -o tmp/helm.tar.gz
       tar -zxf tmp/helm.tar.gz -C tmp
-      mv tmp/linux-"$(dpkg --print-architecture)"/helm bin/
-      chmod +x bin/helm
-      if [ "$(which helm)" == "$(pwd)/bin/helm" ]; then echo "-- bin/helm installed successfully" ; fi
+      sudo mv tmp/linux-"$(dpkg --print-architecture)"/helm /usr/local/bin/
+      sudo chmod +x /usr/local/bin
+      if command -v helm &> /dev/null; then echo "-- helm installed successfully" ; fi
     fi
-    if ! command -v kubectl &> /dev/null || ! [ -f bin/kubectl ] || $force_install_bin; then
-      rm -f bin/kubectl
-      curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(dpkg --print-architecture)/kubectl" -o bin/kubectl
-      chmod +x bin/kubectl
-      if [ "$(which kubectl)" == "$(pwd)/bin/kubectl" ]; then echo "-- bin/kubectl installed successfully" ; fi
+    if ! command -v kubectl &> /dev/null || $force_install_bin; then
+      sudo curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(dpkg --print-architecture)/kubectl" -o /usr/local/bin/kubectl
+      sudo chmod +x /usr/local/bin/kubectl
+      if command -v kubectl &> /dev/null; then echo "-- kubectl installed successfully" ; fi
     fi
-    if ! command -v jq &> /dev/null || ! [ -f bin/jq ] || $force_install_bin; then
-      rm -f bin/jq
-      curl -L "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-$(dpkg --print-architecture)" -o bin/jq
-      chmod +x bin/jq
-      if [ "$(which jq)" == "$(pwd)/bin/jq" ]; then echo "-- bin/jq installed successfully" ; fi
+    if ! command -v jq &> /dev/null || $force_install_bin; then
+      sudo curl -L "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-$(dpkg --print-architecture)" -o /usr/local/bin/jq
+      sudo chmod +x /usr/local/bin/jq
+      if command -v jq &> /dev/null; then echo "-- jq installed successfully" ; fi
     fi
-    if ! command -v k9s &> /dev/null || ! [ -f bin/k9s ] || $force_install_bin; then
-      rm -f bin/k9s
+    if ! command -v k9s &> /dev/null || $force_install_bin; then
       curl -L https://github.com/derailed/k9s/releases/download/v0.32.5/k9s_Linux_"$(dpkg --print-architecture)".tar.gz -o tmp/k9s.tar.gz
       mkdir tmp/k9s
       tar -zxf tmp/k9s.tar.gz -C tmp/k9s
-      mv tmp/k9s/k9s bin/
-      chmod +x bin/k9s
-      if [ "$(which k9s)" == "$(pwd)/bin/k9s" ]; then echo "-- bin/k9s installed successfully" ; fi
+      sudo mv tmp/k9s/k9s /usr/local/bin/
+      sudo chmod +x /usr/local/bin/k9s
+      if command -v k9s &> /dev/null; then echo "-- k9s installed successfully" ; fi
     fi
   fi
   if [[ "$(uname -s)" == *"Darwin"* ]]; then
@@ -397,38 +391,32 @@ function binInstall() {
     else
       echo "-- OS: macOS - CHECKING BINARIES" 
     fi
-    if ! command -v helm &> /dev/null || ! [ -f bin/helm ] || $force_install_bin; then
-      rm -f bin/helm
+    if ! command -v helm &> /dev/null || $force_install_bin; then
       curl -L "https://get.helm.sh/helm-v3.15.2-darwin-$(arch).tar.gz" -o tmp/helm.tar.gz
       tar -zxf tmp/helm.tar.gz -C tmp
-      mv tmp/darwin-"$(arch)"/helm bin/
-      chmod +x bin/helm
-      if [ "$(which helm)" == "$(pwd)/bin/helm" ]; then echo "-- bin/helm installed successfully" ; fi
+      sudo mv tmp/darwin-"$(arch)"/helm /usr/local/bin/
+      sudo chmod +x /usr/local/bin/helm
+      if command -v helm &> /dev/null; then echo "-- helm installed successfully" ; fi
     fi
-    if ! command -v kubectl &> /dev/null || ! [ -f bin/kubectl ] || $force_install_bin; then
-      rm -f bin/kubectl
-      curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/$(arch)/kubectl" -o bin/kubectl
-      chmod +x bin/kubectl
-      if [ "$(which kubectl)" == "$(pwd)/bin/kubectl" ]; then echo "-- bin/kubectl installed successfully" ; fi
+    if ! command -v kubectl &> /dev/null || $force_install_bin; then
+      sudo curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/$(arch)/kubectl" -o /usr/local/bin/kubectl
+      sudo chmod +x /usr/local/bin/kubectl
+      if command -v kubectl &> /dev/null; then echo "-- kubectl installed successfully" ; fi
     fi
-    if ! command -v jq &> /dev/null || ! [ -f bin/jq ] || $force_install_bin; then
-      rm -f bin/jq
-      curl -L "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-$(arch)" -o bin/jq
-      chmod +x bin/jq
-      if [ "$(which jq)" == "$(pwd)/bin/jq" ]; then echo "-- bin/jq installed successfully" ; fi
+    if ! command -v jq &> /dev/null || $force_install_bin; then
+      sudo curl -L "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-$(arch)" -o /usr/local/bin/jq
+      sudo chmod +x /usr/local/bin/jq
+      if command -v jq &> /dev/null; then echo "-- jq installed successfully" ; fi
     fi
-    if ! command -v k9s &> /dev/null || ! [ -f bin/k9s ] || $force_install_bin; then
-      rm -f bin/k9s
+    if ! command -v k9s &> /dev/null || $force_install_bin; then
       curl -L "https://github.com/derailed/k9s/releases/download/v0.32.5/k9s_Darwin_$(arch).tar.gz" -o tmp/k9s.tar.gz
       mkdir tmp/k9s
       tar -zxf tmp/k9s.tar.gz -C tmp/k9s
-      mv tmp/k9s/k9s bin/
-      chmod +x bin/k9s
-      if [ "$(which k9s)" == "$(pwd)/bin/k9s" ]; then echo "-- bin/k9s installed successfully" ; fi
+      sudo mv tmp/k9s/k9s /usr/local/bin/
+      sudo chmod +x /usr/local/bin/k9s
+      if command -v k9s &> /dev/null; then echo "-- k9s installed successfully" ; fi
     fi
   fi
-  chown "$(id -un)":"$(id -gn)" bin/*
-  chmod +x bin/*
   which helm
   which kubectl
   which k9s
