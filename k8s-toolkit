@@ -24,7 +24,7 @@
 if ! [ -f _include ]; then curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include -o _include; fi
 if ! [ -f .env ]; then touch .env; fi
 chmod +x _include .env
-mkdir -p tmp bin 
+mkdir -p tmp bin
 . _include
 SCRIPT_PATH="$(pwd)/bin"
 export PATH="$SCRIPT_PATH:$PATH"
@@ -648,13 +648,9 @@ if command -v kubeadm &> /dev/null; then
     kubeadm reset --cleanup-tmp-dir --force 
 fi
 
-echo "-- $HOSTNAME: Clearing firewall"
-iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
-ipvsadm --clear 
-
 echo "-- $HOSTNAME: Uninstalling k8s (kubelet, kubeadm, and containerd)"
 apt-mark unhold kubelet kubeadm kubectl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 
-for pkg in kubectl kubeadm kubelet ipvsadm docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc temurin-21-jre containerd; do
+for pkg in kubectl kubeadm kubelet docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc temurin-21-jre containerd; do
     apt purge -y --allow-change-held-packages $pkg 
 done
 systemctl stop $(systemctl -l | grep kube) 
@@ -770,10 +766,6 @@ for cmd in iptables ip6tables iptables-legacy ip6tables-legacy; do
   $cmd -F 
   $cmd -X 
 done
-for suffex in raw mangle security nat filter; do
-  modprobe -f -r "ip_tables_$suffex" 
-  modprobe -f -r "ip6_tables_$suffex" 
-done
 update-alternatives --remove iptables /usr/sbin/iptables-legacy
 
 echo "-- $HOSTNAME: Updating, upgrading and installing pre-requisites, please wait ..."
@@ -787,14 +779,10 @@ apt install -y \
     gpg \
     sudo \
     wget \
-    dirmngr \
     gnupg \
-    software-properties-common \
-    ipvsadm \
     util-linux \
     coreutils \
     git \
-    rclone \
     nano \
     jq \
     cifs-utils 
@@ -843,7 +831,7 @@ ____EOF____
 
   if [ "$K8S_VERSION" == "" ]; then
     for IP in "${NODE_ARRAY[@]}"; do
-      DEFAULT_VERSION=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" bash -s "apt-cache policy kubeadm | grep Candidate | awk '{print \$2}'")
+      DEFAULT_VERSION=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "apt-cache policy kubeadm | grep Candidate | awk '{print \$2}'")
       break
     done
     readVar K8S_VERSION "$DEFAULT_VERSION" "Please entre k8s version" 1 30
@@ -1126,10 +1114,8 @@ readVar KUBE_TZ "$TZ_DEFAULT" "Please entre your Time Zone" 1
 
 ##############################################################################################################
 binInstall false
-( export )
 CONTINUE=true
 while $CONTINUE; do
-  clear
   source .env
   if [ "$1" == "" ]; then
     echo "-----------------------------------------------------------" 
