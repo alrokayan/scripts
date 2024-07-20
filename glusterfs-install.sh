@@ -23,18 +23,27 @@
 # $1 Server1 IP
 # $2 Server2 IP
 # $3 Server3 IP
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP>"
+    echo "EXAMPLE: $0 192.168.0.2 192.168.0.3 192.168.0.4"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will install glusterfs"
+        exit 0
+    fi
+    exit 1
+fi
 apt install xfsprogs glusterfs-server glusterfs-client -y
 systemctl enable glusterd
 systemctl start glusterd
 systemctl status glusterd
-gluster peer probe $2
-gluster peer probe $3
+gluster peer probe "$2"
+gluster peer probe "$3"
 gluster peer status
 gluster pool list
 gluster volume create gfs replica 3 arbiter 1 transport tcp \
-  $1:/mnt/gfs_disk/brick1 \
-  $2:/mnt/gfs_disk/brick1 \
-  $3:/mnt/gfs_disk/brick1 \
+  "$1":/mnt/gfs_disk/brick1 \
+  "$2":/mnt/gfs_disk/brick1 \
+  "$3":/mnt/gfs_disk/brick1 \
   force
 gluster volume start gfs
 gluster volume status

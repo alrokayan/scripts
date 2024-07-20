@@ -21,55 +21,52 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/netplan-set-static-ip.sh | bash -s -- eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1
 # $1 NIC
-# $2 staticip
-# $3 staticgateway
-# $4 staticdns
-# $5 staticdns2
+# $2 Static IP
+# $3 Gateway
+# $4 DNS1
+# $5 DNS2
+if [[ "$(uname -s)" == *"Darwin"* ]]; then
+    echo "This script is not supported in macOS"
+    exit 1
+fi
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ -z "$5" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <NIC> <Static IP> <Gateway> <DNS1> <DNS2>"
+    echo "EXAMPLE: $0 eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will set static IP configuration for the specified NIC"
+        exit 0
+    fi
+    exit 1
+fi
 NIC=$1
-staticip=$2
-staticgateway=$3
-staticdns=$4
-staticdns2=$5
-
-# check if user is root
-if [ "$EUID" -ne 0 ]; then
-  echo "Please run as root"
-  exit 1
-fi
-# check if netplan is installed
-if [ ! -f /etc/netplan/01-netcfg.yaml ]; then
-  echo "Netplan is not installed"
-  exit 1
-fi
-if [ -n "$1" ] || [ -n "$2" ] || [ -n "$3" ] || [ -n "$4" ] || [ -n "$5" ]; then
-  echo "Usage: $0 [NIC] [staticip] [staticgateway] [staticdns] [staticdns2]"
-  exit 1
-fi
-cat > /etc/netplan/99-${NIC}-static-ip-config.yaml <<__EOF__
+IP=$2
+GW=$3
+DNS1=$4
+DNS2=$5
+cat > "/etc/netplan/99-$NIC-static-ip-config.yaml" <<__EOF__
 network:
   version: 2
-  renderer: networkd
   ethernets:
     $NIC:
       addresses:
-        - $staticip
+        - $IP
       routes:
         - to: default
-          via: $staticgateway
+          via: $GW
       nameservers:
-          addresses: [$staticdns, $staticdns2]
+          addresses: [$DNS1, $DNS2]
 __EOF__
 # confirm settings
 echo "Static IP configuration file created"
 echo "------------ /etc/netplan/99-${NIC}-static-ip-config.yaml ------------"
-cat /etc/netplan/99-${NIC}-static-ip-config.yaml
+cat "/etc/netplan/99-$NIC-static-ip-config.yaml"
 echo "---------------------------------------------------------------------"
 echo "Do you want to apply the settings now? (y/N)"
-read applySettings
-if [ -z $apply ]; then
+read -r applySettings
+if [ -z "$apply" ]; then
   applySettings="n"
 fi
-if [ $applySettings == "y" ]; then
+if [ "$applySettings" == "y" ]; then
   chmod 600 /etc/netplan/*
   netplan apply
 fi

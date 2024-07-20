@@ -22,4 +22,13 @@
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/rsync.sh | bash -s -- /mnt/disk1 /mnt/disk2
 # $1 From
 # $2 To
-rsync -avzrlt --progress $1 $2
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <From> <To>"
+    echo "EXAMPLE: $0 /mnt/disk1 /mnt/disk2"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will rsync files from one location to another"
+        exit 0
+    fi
+    exit 1
+fi
+rsync -avzrlt --progress "$1" "$2"

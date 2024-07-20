@@ -23,5 +23,14 @@
 # $1 Path to mosquitto config/data volume
 # $2 username
 # $3 password
-sudo docker run -it -v $1:/mosquitto/config --rm eclipse-mosquitto mosquitto_passwd -c -b /mosquitto/config/passwordfile $2 $3
-sudo chmod 0700 $1/passwordfile
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <path> <username> <password>"
+    echo "EXAMPLE: $0 /mnt/nvme/kube-volumes/mosquitto USERNAME PASSWORD"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will generate mosquitto password using docker"
+        exit 0
+    fi
+    exit 1
+fi
+sudo docker run -it -v "$1":/mosquitto/config --rm eclipse-mosquitto mosquitto_passwd -c -b /mosquitto/config/passwordfile "$2" "$3"
+sudo chmod 0700 "$1/passwordfile"

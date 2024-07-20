@@ -20,6 +20,10 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-uninstall.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-uninstall.sh | bash -s
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "This script will uninstall docker"
+    exit 1
+fi
 apt purge -y docker-ce docker-buildx-plugin docker-ce-cli docker-ce-rootless-extras docker-compose-plugin
 apt autoremove -y docker-ce docker-buildx-plugin docker-ce-cli docker-ce-rootless-extras docker-compose-plugin
 rm -rf /var/lib/docker /etc/docker /var/run/docker.sock

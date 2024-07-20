@@ -20,4 +20,12 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./mac-install-xcode-tools.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/mac-install-xcode-tools.sh | bash -s
+if [[ "$(uname -s)" == *"Linux"* ]]; then
+    echo "This script is not supported in Linux"
+    exit 1
+fi
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "This script will install xcode tools"
+    exit 0
+fi
 xcode-select --install

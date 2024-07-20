@@ -22,6 +22,16 @@
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/backup.tar.gz.sh | bash -s -- /mnt/hdd/Backups /mnt/nvme/kube-volumes
 # $1 Backup folder path
 # $2 Target path to backup
+# if -h or --help is passed as an argument, print the following help message
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <backup folder path> <target path to backup>"
+    echo "EXAMPLE: $0 /mnt/hdd/Backups /mnt/nvme/kube-volumes"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will backup the target path to the backup folder path"
+        exit 0
+    fi
+    exit 1
+fi
 DATE_FOLDER=$(date +%Y_%m_%d)
 DATATIME_FILE="$(date +%Y_%m_%d-%H-%M-%S)"
 BACKUP_PATH=$1
@@ -36,5 +46,5 @@ tar --exclude='**/MediaCover/*' \
     --exclude='**/plex/config/Library' \
     --exclude='**/kasm/data' \
     -Pcpzf "$BACKUP_PATH/$DATE_FOLDER/$TARGET/$DATATIME_FILE.tar.gz" \
-    $TARGET
-rm -rf "$(find $BACKUP_PATH -maxdepth 1 -type d -ctime +30)"
+    "$TARGET"
+rm -rf "$(find "$BACKUP_PATH" -maxdepth 1 -type d -ctime +30)"

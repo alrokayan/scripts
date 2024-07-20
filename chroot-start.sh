@@ -17,25 +17,35 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./chroot-start.sh
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./chroot-start.sh /root
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/chroot-start.sh | bash -s
-ROOTFS_PARENT_FOLDER=/root
-if mount | awk '{if ($3 == "'$ROOTFS_PARENT_FOLDER'/rootfs/dev") { exit 0}} ENDFILE{exit -1}'; then
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/chroot-start.sh | bash -s -- /root
+# $1 rootfs parent folder
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <rootfs parent folder>"
+    echo "EXAMPLE: $0 /root"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will start chroot environment"
+        exit 0
+    fi
+    exit 1
+fi
+ROOTFS_PARENT_FOLDER=$1
+if mount | awk '{if ($3 == "'"$ROOTFS_PARENT_FOLDER"'/rootfs/dev") { exit 0}} ENDFILE{exit -1}'; then
     echo "$ROOTFS_PARENT_FOLDER/rootfs/dev/ already mounted"
 else
-    mount -o bind /dev $ROOTFS_PARENT_FOLDER/rootfs/dev/
+    mount -o bind /dev "$ROOTFS_PARENT_FOLDER/rootfs/dev/"
 fi
 
-if mount | awk '{if ($3 == "'$ROOTFS_PARENT_FOLDER'/rootfs/proc") { exit 0}} ENDFILE{exit -1}'; then
+if mount | awk '{if ($3 == "'"$ROOTFS_PARENT_FOLDER"'/rootfs/proc") { exit 0}} ENDFILE{exit -1}'; then
     echo "$ROOTFS_PARENT_FOLDER/rootfs/proc/ already mounted"
 else
-    mount -t proc none $ROOTFS_PARENT_FOLDER/rootfs/proc/
+    mount -t proc none "$ROOTFS_PARENT_FOLDER/rootfs/proc/"
 fi
 
-if mount | awk '{if ($3 == "'$ROOTFS_PARENT_FOLDER'/rootfs/sys") { exit 0}} ENDFILE{exit -1}'; then
+if mount | awk '{if ($3 == "'"$ROOTFS_PARENT_FOLDER"'/rootfs/sys") { exit 0}} ENDFILE{exit -1}'; then
     echo "$ROOTFS_PARENT_FOLDER/rootfs/sys already mounted"
 else
-    mount -o bind /sys $ROOTFS_PARENT_FOLDER/rootfs/sys
+    mount -o bind /sys "$ROOTFS_PARENT_FOLDER/rootfs/sys"
 fi
-chroot $ROOTFS_PARENT_FOLDER/rootfs /bin/bash
+chroot "$ROOTFS_PARENT_FOLDER/rootfs" /bin/bash

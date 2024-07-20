@@ -128,9 +128,14 @@ function NEXT_IP {
   if [ "$1" == "" ]; then echo "-- NEXT_IP ERROR: arg 1 was not found" ; return 1; fi
   IP="$1"
   for ((i = 0; i <= "$2"; i++)); do
-    IP_HEX=$(printf '%.2X%.2X%.2X%.2X\n' "${IP//./ }")
+    # shellcheck disable=SC2183
+    # shellcheck disable=SC2046
+    # shellcheck disable=SC2116
+    IP_HEX=$(printf '%.2X%.2X%.2X%.2X\n' $(echo "${IP//./ }"))
     NEXT_IP_HEX=$(printf %.8X "$(( 0x$IP_HEX + 1 ))")
-    IP=$(printf '%d.%d.%d.%d\n' "$(echo "$NEXT_IP_HEX" | sed -r 's/(..)/0x\1 /g')")
+    # shellcheck disable=SC2183
+    # shellcheck disable=SC2046
+    IP=$(printf '%d.%d.%d.%d\n' $(echo "$NEXT_IP_HEX" | sed -r 's/(..)/0x\1 /g'))
   done
   echo "$IP"
 }

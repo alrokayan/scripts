@@ -21,6 +21,15 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-install-portainer.sh | bash -s -- /docker-volumes/portainer
 # $1 Volume Path
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <volume path>"
+    echo "EXAMPLE: $0 /docker-volumes/portainer"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will install portainer"
+        exit 0
+    fi
+    exit 1
+fi
 docker rm -f portainer
 docker run -d \
            -p 9443:9443 \
@@ -28,5 +37,5 @@ docker run -d \
            --name portainer \
            --restart=always \
            -v /var/run/docker.sock:/var/run/docker.sock \
-           -v $1:/data \
+           -v "$1:/data" \
            portainer/portainer-ce:latest

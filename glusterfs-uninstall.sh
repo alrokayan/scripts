@@ -20,15 +20,17 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-uninstall.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-uninstall.sh | bash -s
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "This script will uninstall glusterfs"
+    exit 1
+fi
 umount /gfs
 sed -i '/glusterfs/d' /etc/fstab
 apt remove glusterfs-client -y
-
 gluster volume stop gfs force
 gluster volume delete gfs force
 systemctl disable glusterd
 systemctl stop glusterd
-
 umount /mnt/gfs_disk
 sed -i '/gfs_disk/d' /etc/fstab
 apt remove glusterfs-server -y

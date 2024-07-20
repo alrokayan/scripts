@@ -20,4 +20,8 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./random-mac-address.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/random-mac-address.sh | bash -s
-printf '00:2F:60:%02X:%02X:%02X\n' $(shuf -i 0-99 -n 1) $(shuf -i 101-199 -n 1) $(shuf -i 201-256 -n 1)
+if [[ "$(uname -s)" == *"Darwin"* ]]; then
+    echo "This script is not supported in macOS"
+    exit 1
+fi
+printf '00:2F:60:%02X:%02X:%02X\n' "$(shuf -i 0-99 -n 1)" "$(shuf -i 101-199 -n 1)" "$(shuf -i 201-256 -n 1)"

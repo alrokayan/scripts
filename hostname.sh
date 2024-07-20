@@ -21,9 +21,18 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/hostname.sh | bash -s -- NEWHOSTNAME
 # $1 New hostname
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <new hostname>"
+    echo "EXAMPLE: $0 NEWHOSTNAME"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will change the hostname of the system"
+        exit 0
+    fi
+    exit 1
+fi
 old_hostname=$(cat /etc/hostname)
-hostnamectl --no-ask-password hostname $1
-sed -i 's/'$old_hostname'/'$1'/g' /etc/hosts
+hostnamectl --no-ask-password hostname "$1"
+sed -i 's/'"$old_hostname"'/'"$1"'/g' /etc/hosts
 cat /etc/hosts
 echo "-- Your new hostname is $(hostname)"
 echo "-- Please restart your system to apply changes"

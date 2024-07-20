@@ -24,6 +24,15 @@
 # $2 Extra IP/SAN
 # $3 Extra IP/SAN
 # $4 Extra IP/SAN
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <Main IP> <Extra IP/SAN> <Extra IP/SAN> <Extra IP/SAN>"
+    echo "EXAMPLE: $0 10.10.1.10 127.16.0.10 master master.example.com"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will update kubeadm certs"
+        exit 0
+    fi
+    exit 1
+fi
 update-ca-certificates
 rm -rf /etc/kubernetes/pki/*
 kubeadm init phase certs all --apiserver-advertise-address "$1" \
@@ -35,6 +44,6 @@ rm -f /etc/kubernetes/admin.conf
 kubeadm init phase kubeconfig admin --apiserver-advertise-address "$1"
 rm -f ~/.kube/config
 cp -i /etc/kubernetes/admin.conf ~/.kube/config
-chown $(id -u):$(id -g) ~/.kube/config
+chown "$(id -u):$(id -g)" ~/.kube/config
 chmod g+r ~/.kube/config
 chmod go-r ~/.kube/config

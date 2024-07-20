@@ -28,14 +28,22 @@
 # $6 CPUs
 # $7 RAM in GB
 # $8 Disk in GB
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ -z "$5" ] || [ -z "$6" ] || [ -z "$7" ] || [ -z "$8" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <Hostname> <Mac> <NIC> <Local mount path> <VM mount path> <CPUs> <RAM in GB> <Disk in GB>"
+    echo "EXAMPLE: $0 ubuntu 00:14:51:3C:84:F1 eno0 /Users/USER/Nextcloud /nextcloud 2 2 64"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will create a VM with the specified parameters"
+    fi
+    exit 1
+fi
 echo "Creating VM: $1 with MAC: $2"
 cat <<EOF | multipass launch 22.04 \
-                --name $1 \
-                --cpus $6 \
-                --disk ${8}G \
-                --memory ${7}G \
-                --mount $4:$5 \
-                --network name=$3,mode=auto,mac=$2 \
+                --name "$1" \
+                --cpus "$6" \
+                --disk "${8}G" \
+                --memory "${7}G" \
+                --mount "$4":"$5" \
+                --network name="$3",mode=auto,mac="$2" \
                 --cloud-init -
 #cloud-config
 hostname: $1
@@ -102,4 +110,4 @@ chpasswd:
 ssh_pwauth: True
 ssh_genkeytypes: ['rsa']
 EOF
-multipass info $VM_HOSTNAME
+multipass info "$VM_HOSTNAME"

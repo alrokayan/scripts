@@ -22,6 +22,15 @@
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-tailscale-with-funnel.sh | bash -s -- AUTHKEY 8123
 # $1 Tailscale authkey
 # $2 Port to funnel
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <Tailscale authkey> <Port to funnel>"
+    echo "EXAMPLE: $0 AUTHKEY 8123"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will install tailscale with funnel"
+        exit 0
+    fi
+    exit 1
+fi
 docker stop tailscale
 sed -i '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
 sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf
@@ -33,6 +42,6 @@ sleep 5s
 docker exec tailscale tailscale up \
        --accept-dns=false \
        --advertise-exit-node=false \
-       --authkey=$1 \
+       --authkey="$1" \
        --reset
-docker exec tailscale tailscale funnel --bg http://127.0.0.1:$2
+docker exec tailscale tailscale funnel --bg http://127.0.0.1:"$2"

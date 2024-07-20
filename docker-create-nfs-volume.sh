@@ -23,8 +23,17 @@
 # $1 NFS SERVER
 # $2 PATH
 # $3 NAME
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <NFS SERVER> <PATH> <NAME>"
+    echo "EXAMPLE: $0 10.0.0.1 /mnt/hdd/Nextcloud nextcloud"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will create a docker volume using NFS"
+        exit 0
+    fi
+    exit 1
+fi
 docker volume create --driver local \
   --opt type=nfs \
-  --opt o=addr=$1,rw,nfsvers=4  \
-  --opt device=:$2 \
-  $3
+  --opt "o=addr=$1,rw,nfsvers=4"  \
+  --opt "device=:$2" \
+  "$3"

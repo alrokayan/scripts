@@ -17,10 +17,19 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./tailscale-install.sh AUTHKEY
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./tailscale-install.sh ts_1234567890abcdef
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/tailscale-install.sh | bash -s -- AUTHKEY
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/tailscale-install.sh | bash -s -- ts_1234567890abcdef
 # $1 Tailscale authkey
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <tailscale authkey>"
+    echo "EXAMPLE: $0 ts_1234567890abcdef"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will install tailscale"
+        exit 0
+    fi
+    exit 1
+fi
 curl -fsSL https://tailscale.com/install.sh | sh
 sed -i '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
 sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf

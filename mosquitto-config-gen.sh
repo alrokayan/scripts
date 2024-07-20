@@ -21,10 +21,19 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/mosquitto-config-gen.sh | bash -s -- /mnt/nvme/kube-volumes/mosquitto
 # $1 Path
-mkdir -p $1
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <path>"
+    echo "EXAMPLE: $0 /mnt/nvme/kube-volumes/mosquitto"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will generate mosquitto configuration"
+        exit 0
+    fi
+    exit 1
+fi
+mkdir -p "$1"
 echo 'persistence true
 persistence_location /mosquitto/config/data
-log_dest file /mosuqitto/config/log/mosquitto.log
+log_dest file /mosquitto/config/log/mosquitto.log
 per_listener_settings true
 
 listener 1883 0.0.0.0
@@ -32,5 +41,5 @@ allow_anonymous false
 password_file /mosquitto/config/passwordfile
 
 listener 1880 127.0.0.1
-allow_anonymous true' > $1/mosquitto.conf
-sudo chown -R 1883:1883 $1
+allow_anonymous true' > "$1/mosquitto.conf"
+sudo chown -R 1883:1883 "$1"

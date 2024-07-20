@@ -21,12 +21,21 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-run-adguard.sh | bash -s -- /docker-volumes/adguard
 # $1 Volume path
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <volume path>"
+    echo "EXAMPLE: $0 /docker-volumes/adguard"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will run adguard on docker"
+        exit 0
+    fi
+    exit 1
+fi
 docker rm -f adguard
 docker run -d \
     --name=adguard \
     -e TZ=Asia/Riyadh \
-    -v $1/config:/opt/adguardhome/conf \
-    -v $2/data:/opt/adguardhome/work \
+    -v "$1/config:/opt/adguardhome/conf" \
+    -v "$2/data:/opt/adguardhome/work" \
     --net=host \
     --restart always \
     adguard/adguardhome

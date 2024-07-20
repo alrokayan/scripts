@@ -22,6 +22,15 @@
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-create-subnet.env.sh | bash -s -- 10.244 0
 # $1 First and second octet
 # $2 Third octet
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <First and second octet> <Third octet>"
+    echo "EXAMPLE: $0 10.244 0"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will create a subnet.env file"
+        exit 0
+    fi
+    exit 1
+fi
 mkdir -p /run/flannel
 cat << EOF > /run/flannel/subnet.env
 FLANNEL_NETWORK=$1.0.0/16

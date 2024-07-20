@@ -21,28 +21,40 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/kasm-install.sh | bash -s -- PASSWORD
 # $1 Password
-export KASM_UID=$(id kasm -u)
-export KASM_GID=$(id kasm -g)
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <password>"
+    echo "EXAMPLE: $0 PASSWORD"
+    if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+        echo "This script will install Kasm on docker"
+        exit 0
+    fi
+    exit 1
+fi
+KASM_UID=$(id kasm -u)
+export KASM_UID
+KASM_GID=$(id kasm -g)
+export KASM_GID
 echo "-- Deleting Kasm containers"
 /opt/kasm/current/bin/stop
 echo "-- Downloading Kasm in /tmp"
-cd /tmp
+cd /tmp || exit
 rm -f kasm.tar.gz
 curl -L https://kasm-static-content.s3.amazonaws.com/kasm_release_1.15.0.06fdc8.tar.gz -o kasm.tar.gz
 rm -rf kasm_release
 tar -xf kasm.tar.gz 
-export IP=$(hostname -I | awk '{print $1}')
+IP=$(hostname -I | awk '{print $1}')
+export IP
 export PORT=10443
 export KASM_PASSWORD=$1
 echo "-- Installing Kasm on $IP:$PORT (SSL)"
 mkdir -p /opt/Kasm
-./kasm_release/install.sh  noninteractive \
+./kasm_release/install.sh noninteractive \
                           --slim-images \
-                          --admin-password $KASM_PASSWORD \
-                          --user-password $KASM_PASSWORD \
+                          --admin-password "$KASM_PASSWORD" \
+                          --user-password "$KASM_PASSWORD" \
                           --accept-eula \
                           --default-images \
-                          --proxy-port $PORT
+                          --proxy-port "$PORT"
 
 echo "-- SETUP KASM: https://$IP:3000 (TEMPORARY)"
 echo "-------------------------------------------"

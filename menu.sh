@@ -17,11 +17,18 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-delete-all-containers.sh
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./menu.sh
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-delete-all-containers.sh | bash -s
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/menu.sh | bash -s
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "This script will delete all docker containers"
+    echo "This script will show all available scripts"
     exit 0
 fi
-docker rm  -f "$(docker ps -qa)"
+for file in *.sh; do
+    if [ "$file" == "menu.sh" ]; then continue; fi
+	echo
+	echo "-----------------------------------"
+	echo "-------------- $file"
+	echo "-----------------------------------"
+	"./$file" -h
+done

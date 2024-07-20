@@ -20,6 +20,10 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./ha-dashboard-gen.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-dashboard-gen.sh | bash -s
+if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "This script will generate a dashboard for Home Assistant"
+    exit 1
+fi
 DASHBAORD="MAJED"
 ROOMS=("GF Living" "Dining" "Daily Seating" "Main Kitchen" "Open Kitchen" "F1" "Master" "Room" "F2" "Playroom" "Maid" "Outdoor")
 echo "title: $DASHBAORD
@@ -71,7 +75,7 @@ echo "            card:
               state_color: true
               title: Meross
             show_empty: true
-        title: Uncatorized
+        title: Uncategorized
     title: $DASHBAORD
     icon: mdi:home
     cards: []
@@ -174,8 +178,8 @@ echo "            card:
     path: cctv
     cards: []
   - icon: mdi:battery
-    title: Battries
-    path: battries
+    title: Batteries
+    path: batteries
     cards:" >> $DASHBAORD.yaml
 for r in "${ROOMS[@]}"; do
     echo "      - type: custom:auto-entities
