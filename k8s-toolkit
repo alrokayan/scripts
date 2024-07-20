@@ -1042,6 +1042,7 @@ ____EOF____
   else
     echo "Please do step 2 before kubernetes cluster is not installed .." 
   fi
+  wait
   echo "---------------------------------------------------------------" 
 }
 
