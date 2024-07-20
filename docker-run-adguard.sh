@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-run-adguard.sh /docker-volumes/adguard /docker-volumes/adguard
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-run-adguard.sh | bash -s -- /docker-volumes/adguard
 # $1 Volume path
 docker rm -f adguard

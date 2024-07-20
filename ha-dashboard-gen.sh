@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./ha-dashboard-gen.sh
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-dashboard-gen.sh | bash -s
 DASHBAORD="MAJED"
 ROOMS=("GF Living" "Dining" "Daily Seating" "Main Kitchen" "Open Kitchen" "F1" "Master" "Room" "F2" "Playroom" "Maid" "Outdoor")

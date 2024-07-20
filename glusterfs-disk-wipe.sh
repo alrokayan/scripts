@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-disk-wipe.sh /dev/sdb
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-wipe.sh | bash -s -- /dev/sdb
 # $1 Disk to wipe, xfs formate, and mount
 DISK=$1

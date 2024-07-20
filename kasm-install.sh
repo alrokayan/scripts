@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./kasm-install.sh PASSWORD
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/kasm-install.sh | bash -s -- PASSWORD
 # $1 Password
 export KASM_UID=$(id kasm -u)

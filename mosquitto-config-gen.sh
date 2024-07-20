@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./mosquitto-config-gen.sh /mnt/nvme/kube-volumes/mosquitto
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/mosquitto-config-gen.sh | bash -s -- /mnt/nvme/kube-volumes/mosquitto
 # $1 Path
 mkdir -p $1

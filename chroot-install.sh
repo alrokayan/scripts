@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./chroot-install.sh
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/chroot-install.sh | bash -s
 ISO_SR=/run/sr-mount/d6818f51-40ac-b1f3-cd6c-d658d9e4fd21
 ROOTFS_PARENT_FOLDER=/root

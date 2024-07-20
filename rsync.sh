@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./rsync.sh /mnt/disk1 /mnt/disk2
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/rsync.sh | bash -s -- /mnt/disk1 /mnt/disk2
 # $1 From
 # $2 To

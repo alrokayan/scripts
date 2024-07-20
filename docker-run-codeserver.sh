@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-run-codeserver.sh /docker-volumes/code-server PASSWORD example.com
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-run-codeserver.sh | bash -s -- /docker-volumes/code-server PASSWORD example.com
 # $1 Volume path
 # $2 Password

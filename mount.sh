@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./mount.sh 10.0.0.1 /mnt/hdd/Nextcloud /nextcloud
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/mount.sh | bash -s -- 10.0.0.1 /mnt/hdd/Nextcloud /nextcloud
 # $1 = NFS server address
 # $2 = NFS path

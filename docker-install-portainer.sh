@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-install-portainer.sh /docker-volumes/portainer
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-install-portainer.sh | bash -s -- /docker-volumes/portainer
 # $1 Volume Path
 docker rm -f portainer

@@ -17,51 +17,35 @@
 # under the License.
 #
 # HOW TO:
-# curl https://raw.githubusercontent.com/alrokayan/scripts/main/netplan-set-static-ip.sh | bash -s
-ip a | grep ": "
-echo "Enter your network card name (Default: eth0): "
-read NIC
-if [ -z $NIC ]; then
-  NIC="eth0"
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./netplan-set-static-ip.sh eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1
+# OR
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/netplan-set-static-ip.sh | bash -s -- eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1
+# $1 NIC
+# $2 staticip
+# $3 staticgateway
+# $4 staticdns
+# $5 staticdns2
+NIC=$1
+staticip=$2
+staticgateway=$3
+staticdns=$4
+staticdns2=$5
+
+# check if user is root
+if [ "$EUID" -ne 0 ]; then
+  echo "Please run as root"
+  exit 1
 fi
-if [ -f /etc/netplan/01-${NIC}-static-ip-config.yaml ]; then
-  echo "Static IP configuration file already exists"
-  echo "Do you want to overwrite it? (y/N)"
-  read overwrite
-  if [ -z $overwrite ]; then
-    overwrite="N"
-  fi
-  if [ "$overwrite" != "y" ]; then
-    echo "Exiting..."
-    exit 1
-  fi
+# check if netplan is installed
+if [ ! -f /etc/netplan/01-netcfg.yaml ]; then
+  echo "Netplan is not installed"
+  exit 1
 fi
-# read from user static ip
-echo "Enter new static IP with subnet: (Default 192.168.4.201/25) "
-read staticip
-if [ -z $staticip ]; then
-  staticip="192.168.4.201/25"
+if [ -n "$1" ] || [ -n "$2" ] || [ -n "$3" ] || [ -n "$4" ] || [ -n "$5" ]; then
+  echo "Usage: $0 [NIC] [staticip] [staticgateway] [staticdns] [staticdns2]"
+  exit 1
 fi
-# read from user static gateway
-echo "Enter new static gateway: (Default: 192.168.4.1)"
-read staticgateway
-if [ -z $staticgateway ]; then
-  staticgateway="192.168.4.1"
-fi
-# read from user static dns
-echo "Enter new static dns: (Default: 1.1.1.1)"
-read staticdns
-if [ -z $staticdns ]; then
-  staticdns="1.1.1.1"
-fi
-# read from user static dns
-echo "Enter new static dns2: (Default: 8.8.8.8)"
-read staticdns2
-if [ -z $staticdns2 ]; then
-  staticdns2="8.8.8.8"
-fi
-# write to file
-cat > /etc/netplan/01-${NIC}-static-ip-config.yaml <<__EOF__
+cat > /etc/netplan/99-${NIC}-static-ip-config.yaml <<__EOF__
 network:
   version: 2
   renderer: networkd
@@ -77,8 +61,8 @@ network:
 __EOF__
 # confirm settings
 echo "Static IP configuration file created"
-echo "------------ /etc/netplan/01-${NIC}-static-ip-config.yaml ------------"
-cat /etc/netplan/01-${NIC}-static-ip-config.yaml
+echo "------------ /etc/netplan/99-${NIC}-static-ip-config.yaml ------------"
+cat /etc/netplan/99-${NIC}-static-ip-config.yaml
 echo "---------------------------------------------------------------------"
 echo "Do you want to apply the settings now? (y/N)"
 read applySettings

@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./tailscale-install.sh AUTHKEY
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/tailscale-install.sh | bash -s -- AUTHKEY
 # $1 Tailscale authkey
 curl -fsSL https://tailscale.com/install.sh | sh

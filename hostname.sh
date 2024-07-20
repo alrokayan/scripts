@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./hostname.sh NEWHOSTNAME
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/hostname.sh | bash -s -- NEWHOSTNAME
 # $1 New hostname
 old_hostname=$(cat /etc/hostname)

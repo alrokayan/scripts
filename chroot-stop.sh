@@ -17,6 +17,8 @@
 # under the License.
 #
 # HOW TO:
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./chroot-stop.sh
+# OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/chroot-stop.sh | bash -s
 ROOTFS_PARENT_FOLDER=/root
 umount -l $ROOTFS_PARENT_FOLDER/rootfs/dev
