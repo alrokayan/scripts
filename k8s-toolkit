@@ -45,7 +45,7 @@ export L2_SWITCH_DEFAULT="n"
 export MASTER_SCHEDULE_DEFAULT="n"
 export TZ_DEFAULT="Etc/GMT"
 export SSH_USERNAME_DEFAULT="root"
-PRIVATE_KEY_DEFAULT="$(pwd)/.ssh/id_rsa"
+PRIVATE_KEY_DEFAULT="$HOME/.ssh/id_rsa"
 export PRIVATE_KEY_DEFAULT
 ## DEFAULT VALUES FOR STEP 4 (GENERATE EXAMPLE CSV FILE)
 export CSV_MASTER_NIC_DEFAULT="eth0"
@@ -586,6 +586,39 @@ ____EOF____
   fi
   echo "-- Uninstalling Network-Attachment-Definitions" 
   kubectl delete Network-Attachment-Definitions --all -A --grace-period=0 --force
+}
+
+#######################################
+#######################################
+######## FUNCTION SSH_COPY_ID ###########
+#######################################
+#######################################
+function SSH_COPY_ID() {
+  if [ "$PRIVATE_KEY" == "" ]; then echo "-- ERROR: PRIVATE_KEY is empty "  ; return 1; fi
+
+  if [ ! -f $PRIVATE_KEY ]; then
+    echo "-- $PRIVATE_KEY not found. Generating new keys" 
+    mkdir -p "$(dirname $PRIVATE_KEY)"
+    ssh-keygen -t rsa -b 4096 -C "k8s" -f "$PRIVATE_KEY" -N ""
+  else
+    echo "-- Using $PRIVATE_KEY" 
+  fi
+  chmod 700 "$(dirname $PRIVATE_KEY)"
+  chmod 600 "$PRIVATE_KEY"
+  chmod 644 "$PRIVATE_KEY.pub"
+  echo "PUBLIC KEY: "
+  cat "$PRIVATE_KEY.pub"
+
+  WAIT_ALL_NODES_ONLINE "${NODE_ARRAY[@]}"
+  for ((i = 0; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
+    IP=${NODE_ARRAY[$i]}
+    echo "-- copying public key to $IP " 
+    ssh-keygen -f "$HOME/.ssh/known_hosts" -R "$IP"
+    mkdir -p ~/.ssh
+    chmod 700 ~/.ssh
+    ssh-copy-id -o LogLevel=QUIET -i "$PRIVATE_KEY" $SSH_EXTRA_ARGS "$SSH_USERNAME"@"$IP"
+  done
+  return 0
 }
 
 #######################################
