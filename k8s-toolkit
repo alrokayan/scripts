@@ -24,7 +24,7 @@
 if ! [ -f _include ]; then curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include -o _include; fi
 if ! [ -f .env ]; then touch .env; fi
 chmod +x _include .env
-mkdir -p tmp bin
+mkdir -p tmp
 . _include
 if ! grep "export SSH_EXTRA_ARGS=" .env; then
   echo 'export SSH_EXTRA_ARGS="-o StrictHostKeyChecking=no"' >> .env
