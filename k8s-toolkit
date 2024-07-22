@@ -1119,7 +1119,6 @@ done
 readYesNoVar L2_SWITCH "$L2_SWITCH_DEFAULT" "Are all nodes connected to a L2 switch? (entre y or n)" 1
 readYesNoVar MASTER_SCHEDULE "$MASTER_SCHEDULE_DEFAULT" "Do you want to schedule pods in the master node? (entre y or n)" 1
 if [ ! -f "$KUBECONFIG" ]; then
-  KUBECONFIG="$KUBECONFIG_DEFAULT"
   readVar KUBECONFIG "$KUBECONFIG_DEFAULT" "Please entre the path for KUBECONFIG"
 fi
 readVar CLUSTER_CIDR_FIRST_TWO_OCTETS "$CLUSTER_CIDR_DEFAULT" "Please entre the first two octets of the subnet 16 of the cluster CIDR (10.244 means 10.244.0.0/16)" 1
