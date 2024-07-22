@@ -638,7 +638,7 @@ fi
 
 echo "-- $HOSTNAME: Uninstalling k8s (kubelet, kubeadm, and containerd)"
 apt-mark unhold kubelet kubeadm kubectl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 
-for pkg in kubectl kubeadm kubelet docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc temurin-21-jre containerd; do
+for pkg in kubectl kubeadm kubelet docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc containerd; do
     apt purge -y --allow-change-held-packages $pkg 
 done
 systemctl stop $(systemctl -l | grep kube) 
@@ -772,7 +772,6 @@ apt install -y \
     coreutils \
     git \
     nano \
-    jq \
     cifs-utils 
 
 echo "-- $HOSTNAME: Enabling kernel modules, ip forwarding and disabling DNSStubListener"
