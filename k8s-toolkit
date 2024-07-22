@@ -417,14 +417,6 @@ function binInstall() {
       if command -v k9s &> /dev/null; then echo "-- k9s installed successfully" ; fi
     fi
   fi
-  which helm
-  which kubectl
-  which k9s
-  which jq
-  helm version
-  kubectl version --client=true
-  k9s version
-  jq --version
 }
 #######################################
 #######################################
