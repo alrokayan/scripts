@@ -469,19 +469,19 @@ function unDeployAll() {
   unDeploy
   echo "-- Uninstalling Multus" 
   (
-  if ! [ -f tmp/multus-daemonset-thick.yml ]; then
-    curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml -o tmp/multus-daemonset-thick.yml
-    sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/multus-daemonset-thick.yml
-  fi
-  kubectl delete -n kube-network -f tmp/multus-daemonset-thick.yml --grace-period=0 --force
+    if ! [ -f tmp/multus-daemonset-thick.yml ]; then
+      curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml -o tmp/multus-daemonset-thick.yml
+      sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/multus-daemonset-thick.yml
+    fi
+    kubectl delete -n kube-network -f tmp/multus-daemonset-thick.yml --grace-period=0 --force
   ) &
   echo "-- Uninstalling DHCP" 
   (
-  if ! [ -f tmp/dhcp-daemonset.yml ]; then
-    curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/reference-deployment/master/multus-dhcp/dhcp-daemonset.yml -o tmp/dhcp-daemonset.yml
-    sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
-  fi
-  kubectl delete -n kube-network -f tmp/dhcp-daemonset.yml --grace-period=0 --force
+    if ! [ -f tmp/dhcp-daemonset.yml ]; then
+      curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/reference-deployment/master/multus-dhcp/dhcp-daemonset.yml -o tmp/dhcp-daemonset.yml
+      sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
+    fi
+    kubectl delete -n kube-network -f tmp/dhcp-daemonset.yml --grace-period=0 --force
   ) &
   echo "-- Uninstalling flannel" 
   ( helm uninstall flannel -n kube-network ) &
@@ -492,10 +492,10 @@ function unDeployAll() {
     kubectl delete ns "kube-network" --grace-period=0 --force
   ) &
   wait & sleep 10
-  echo "-- Deleting leftover NICs, and cni files on all nodes" 
-  for IP in "${NODE_ARRAY[@]}"; do
-    (
-    ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" bash <<'____EOF____'
+  echo "-- Deleting leftover NICs, and cni files on all nodes"
+  (
+    for IP in "${NODE_ARRAY[@]}"; do
+      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" bash <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: deleting leftover NICs"
 for nic in $(ip link show | grep -e ": cni" -e ": flannel" | awk -F@ '{print $1}' | awk '{print $2}'); do
@@ -511,8 +511,8 @@ rm -rf /run/cni
 rm -rf /var/lib/cni
 rm -rf /etc/cni
 ____EOF____
-    ) &
-  done
+    done
+  )
   wait & sleep 10
   echo "-- Restarting CoreDNS" 
   kubectl delete pod --selector=k8s-app=kube-dns -n kube-system --grace-period=0 --force
@@ -570,8 +570,7 @@ function step0() {
   fi
   echo "-- Uninstalling (reset kubeadm, firewall, files, network) on all nodes" 
   for IP in "${NODE_ARRAY[@]}"; do
-    (
-      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
+    ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: Uninstalling"
 if command -v kubeadm &> /dev/null; then
@@ -579,9 +578,9 @@ if command -v kubeadm &> /dev/null; then
     kubeadm reset --cleanup-tmp-dir --force 
 fi
 echo "-- $HOSTNAME: Uninstalling k8s (kubelet, kubeadm, and containerd)"
-systemctl stop $(systemctl -l | grep kube) 
-systemctl disable $(systemctl -l | grep kube) 
-apt-mark unhold kubelet kubeadm kubectl containerd docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 
+systemctl stop $(systemctl -l | grep kube) &> /dev/null;
+systemctl disable $(systemctl -l | grep kube) &> /dev/null;
+apt-mark unhold kubelet kubeadm kubectl containerd docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &> /dev/null;
 for pkg in kubectl kubeadm kubelet docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc containerd; do
     apt purge -y --allow-change-held-packages $pkg 
 done
@@ -631,9 +630,7 @@ sed -i '/.*DNSStubListener=no.*/ c\#DNSStubListener=' /etc/systemd/resolved.conf
 systemctl restart systemd-resolved.service
 echo "-- $HOSTNAME: Uninstall Completed"
 ____EOF____
-    ) &
   done
-  wait & sleep 20
   echo "---------------------------------------------------------------" 
 }
 
@@ -653,12 +650,9 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters' >>tmp/hosts
   for IP in "${NODE_ARRAY[@]}"; do
-    (
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" "mv /etc/hosts /etc/hosts.BACKUP"
       scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/hosts "$SSH_USERNAME"@"$IP":/etc/
-    ) &
   done
-  wait
   echo "-- Updating, upgrading and installing pre-requisites on all nodes, please wait ..." 
   for IP in "${NODE_ARRAY[@]}"; do
     (
