@@ -26,61 +26,94 @@
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/pi-enable-ssh.sh | bash -s -- /dev/disk4s2
 # $1 Path to disk (only for Linux)
+#######################################
+#######################################
+######### FUNCTION binInstall #########
+#######################################
+#######################################
+function ENABLE_CONFIG_SSH() {
+    echo "-- ROOT_MNT_PATH: $ROOT_MNT_PATH"
+    echo "-- BOOT_MNT_PATH: $BOOT_MNT_PATH"
+    if ! df | grep -q "$ROOT_MNT_PATH" || ! df | grep -q "$BOOT_MNT_PATH" ; then
+        echo " -- Disk is not mounted. Try to unplug and re-plug the disk"
+        exit 1
+    fi
+    df -h | grep -E "$ROOT_MNT_PATH|$BOOT_MNT_PATH"
+    touch "$BOOT_MNT_PATH/ssh" && echo " -- ssh enabled successfully"
+    if ! [ -f "$BOOT_MNT_PATH/userconf" ]; then
+        echo "-- Please enter the password for the root user"
+        echo "root:$(openssl passwd -6)" > "$BOOT_MNT_PATH/userconf"
+    fi
+    echo "-- User configuration file ($BOOT_MNT_PATH/userconf) content: "
+    cat "$BOOT_MNT_PATH/userconf"
+    mkdir -p "$ROOT_MNT_PATH/root/.ssh"
+    cat "$HOME/.ssh/id_rsa.pub" > $ROOT_MNT_PATH/root/.ssh/authorized_keys
+    cat "$ROOT_MNT_PATH/root/.ssh/authorized_keys"
+    sed -i.BACKUP 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' "$ROOT_MNT_PATH/etc/ssh/sshd_config"
+    grep "PermitRootLogin yes" "$ROOT_MNT_PATH/etc/ssh/sshd_config"
+    sed -i.BACKUP 's/PasswordAuthentication no/PasswordAuthentication yes/' "$ROOT_MNT_PATH/etc/ssh/sshd_config"
+    sed -i.BACKUP 's/#PasswordAuthentication yes/PasswordAuthentication yes/' "$ROOT_MNT_PATH/etc/ssh/sshd_config"
+    grep "PasswordAuthentication yes" "$ROOT_MNT_PATH/etc/ssh/sshd_config"
+    sed -i.BACKUP 's/#   StrictHostKeyChecking ask/    StrictHostKeyChecking no/' "$ROOT_MNT_PATH/etc/ssh/ssh_config"
+    grep "StrictHostKeyChecking no" -B 14 "$ROOT_MNT_PATH/etc/ssh/ssh_config" 
+    sed -i.BACKUP 's/#net.ipv4.ip_forward=1/net.ipv4.ip_forward=1/' "$ROOT_MNT_PATH/etc/sysctl.conf"
+    grep "net.ipv4.ip_forward=1" "$ROOT_MNT_PATH/etc/sysctl.conf"
+    sed -i.BACKUP 's/#net.ipv6.conf.all.forwarding=1/net.ipv6.conf.all.forwarding=1/' "$ROOT_MNT_PATH/etc/sysctl.conf"
+    grep "net.ipv6.conf.all.forwarding=1" "$ROOT_MNT_PATH/etc/sysctl.conf"
+    sed -i.BACKUP 's/#DefaultTimeoutStopSec=90s/DefaultTimeoutStopSec=10s/' "$ROOT_MNT_PATH/etc/systemd/system.conf"
+    grep "DefaultTimeoutStopSec=10s" "$ROOT_MNT_PATH/etc/systemd/system.conf"
+    mkdir -p $ROOT_MNT_PATH/root/BACKED_FILES
+    mv $ROOT_MNT_PATH/etc/ssh/sshd_config.BACKUP $ROOT_MNT_PATH/root/BACKED_FILES/
+    mv $ROOT_MNT_PATH/etc/sysctl.conf.BACKUP $ROOT_MNT_PATH/root/BACKED_FILES/
+    mv $ROOT_MNT_PATH/etc/systemd/system.conf.BACKUP $ROOT_MNT_PATH/root/BACKED_FILES/
+    ls -al $ROOT_MNT_PATH/root/BACKED_FILES/
+    echo " -- ssh configured successfully"
+    sudo umount -f -v $ROOT_MNT_PATH
+    sudo umount -f -v $BOOT_MNT_PATH
+    if ! df -h | grep -E "$ROOT_MNT_PATH|$BOOT_MNT_PATH"; then
+        echo " -- Disk unmounted successfully, you can UNPLUG the disk now"
+    else
+        echo " -- Disk failed to be unmounted"
+    fi
+}
+
 if [[ "$(uname -s)" == *"Darwin"* ]]; then
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo "This script will enable ssh in raspios disk"
+        echo "This script will enable ssh for raspeberry using it's pi disk"
         echo "For mac Download and install extFS for mac from https://www.paragon-software.com/us/home/extfs-mac/"
         exit 0
     fi
     echo " -- Mac OS detected"
-    touch "/Volumes/bootfs/ssh" && ls -al "/Volumes/bootfs/ssh" && echo " -- ssh enabled successfully"
-    echo "$HOME/.ssh/id_rsa.pub" >> /Volumes/rootfs/root/.ssh/authorized_keys
-    cat /Volumes/rootfs/root/.ssh/authorized_keys
-    sed -i '/#PermitRootLogin prohibit-password/c\PermitRootLogin yes' /Volumes/rootfs/etc/ssh/sshd_config
-    sed -i '/PasswordAuthentication no/c\PasswordAuthentication yes' /Volumes/rootfs/etc/ssh/sshd_config
-    sed -i '/#   StrictHostKeyChecking ask/c\    StrictHostKeyChecking no' /Volumes/rootfs/etc/ssh/ssh_config
-    sed -i '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /Volumes/rootfs/etc/sysctl.conf
-    sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /Volumes/rootfs/etc/sysctl.conf
-    sed -i '/#DefaultTimeoutStopSec=90s/c\DefaultTimeoutStopSec=10s' /Volumes/rootfs/etc/systemd/system.conf
-    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=\"/&usbcore.autosuspend=-1 /' /Volumes/rootfs/etc/default/grub
-    sed -i '/.*#DNSStubListener=.*/ c\DNSStubListener=no' /Volumes/rootfs/etc/systemd/resolved.conf
-    echo " -- ssh configured successfully"
-    sudo diskutil unmountDisk "$1"
-    echo " -- Disk unmounted successfully"
+    if ! openssl version | grep -q 'OpenSSL'; then
+        echo " -- openssl is not installed"
+        brew install openssl
+    fi
+    ROOT_MNT_PATH="/Volumes/rootfs"
+    BOOT_MNT_PATH="/Volumes/bootfs"
+    ENABLE_CONFIG_SSH
 fi
 if [[ "$(uname -s)" == *"Linux"* ]]; then
     if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "Usage: $0 <path-to-disk>"
-        echo "EXAMPLE: $0 /dev/disk4s2"
+        echo "EXAMPLE: $0 /dev/disk4"
         if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-            echo "This script will enable ssh in raspios disk"
-            echo "For mac Download and install extFS for mac from https://www.paragon-software.com/us/home/extfs-mac/"
+            echo "This script will enable ssh for raspeberry using it's pi disk"
             exit 0
         fi
         exit 1
     fi
-    echo " -- Linux OS detected" 
-    TMP_MNT_PATH="/mnt/raspios"
-    rmdir "$TMP_MNT_PATH"
-    mkdir -p "$TMP_MNT_PATH"
-    echo "-- Running: mount -t ext4 $1 $TMP_MNT_PATH"
-    mount -t ext4 "$1" "$TMP_MNT_PATH" && echo " -- Disk mounted successfully" && touch "$TMP_MNT_PATH/ssh" && echo " -- ssh enabled successfully"
-    echo "$HOME/.ssh/id_rsa.pub" >> $TMP_MNT_PATH/root/.ssh/authorized_keys
-    cat $TMP_MNT_PATH/root/.ssh/authorized_keys
-    sed -i '/#PermitRootLogin prohibit-password/c\PermitRootLogin yes' $TMP_MNT_PATH/etc/ssh/sshd_config
-    sed -i '/PasswordAuthentication no/c\PasswordAuthentication yes' $TMP_MNT_PATH/etc/ssh/sshd_config
-    sed -i '/#   StrictHostKeyChecking ask/c\    StrictHostKeyChecking no' $TMP_MNT_PATH/etc/ssh/ssh_config
-    sed -i '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' $TMP_MNT_PATH/etc/sysctl.conf
-    sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' $TMP_MNT_PATH/etc/sysctl.conf
-    sed -i '/#DefaultTimeoutStopSec=90s/c\DefaultTimeoutStopSec=10s' $TMP_MNT_PATH/etc/systemd/system.conf
-    sed -i 's/GRUB_CMDLINE_LINUX_DEFAULT=\"/&usbcore.autosuspend=-1 /' $TMP_MNT_PATH/etc/default/grub
-    sed -i '/.*#DNSStubListener=.*/ c\DNSStubListener=no' $TMP_MNT_PATH/etc/systemd/resolved.conf
-    echo " -- ssh configured successfully"
-    sudo umount -f -v "$1"
-    echo " -- Disk unmounted successfully"
-
+    echo " -- Linux OS detected"
+    ROOT_MNT_PATH="/mnt/rootfs"
+    BOOT_MNT_PATH="/mnt/bootfs"
+    umount -f $ROOT_MNT_PATH
+    umount -f $BOOT_MNT_PATH
+    rmdir "$ROOT_MNT_PATH"
+    rmdir "$BOOT_MNT_PATH"
+    mkdir -p "$ROOT_MNT_PATH"
+    mkdir -p "$BOOT_MNT_PATH"
+    echo "-- Running: mount -t ext4 ${1}s1 $BOOT_MNT_PATH"
+    echo "-- Running: mount -t ext4 ${1}s2 $ROOT_MNT_PATH"
+    mount -t ext4 "${1}s1" "$BOOT_MNT_PATH" && echo " -- Bootfs disk mounted successfully"
+    mount -t ext4 "${1}s2" "$ROOT_MNT_PATH" && echo " -- Rootfs disk mounted successfully"
+    ENABLE_CONFIG_SSH
 fi
-for mount_point in $(df | grep -e "$1" | awk '{print $9}'); do
-    echo " -- Unmounting $mount_point"
-    sudo umount -f -v "$mount_point"
-done
