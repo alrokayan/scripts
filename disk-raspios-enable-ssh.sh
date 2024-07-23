@@ -17,25 +17,21 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-pi-image-enable-ssh.sh /dev/disk4
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-raspios-enable-ssh.sh /dev/disk4
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-pi-image-enable-ssh.sh | bash -s -- /dev/disk4
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-raspios-enable-ssh.sh | bash -s -- /dev/disk4
 # $1 Path to disk
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "Usage: $0 <path-to-image> <path-to-disk>"
-    echo "EXAMPLE: $0 /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4"
+    echo "Usage: $0 <path-to-disk>"
+    echo "EXAMPLE: $0 /dev/disk4"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo "This script will write the image to the disk."
+        echo "This script will enable ssh in raspios disk"
         exit 0
     fi
     exit 1
 fi
-sudo diskutil unmountDisk "$2"
-if [ "${1##*.}" == "img" ] || [ "${1##*.}" == "iso" ]; then
-    echo "Writing $1 to disk $2, please wait..."
-    sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
-else
-    echo "Extracting $1 and writing to disk $2, please wait..."
-    gunzip --force --verbose --stdout "$1" | sudo dd of="$2" bs=4M conv=notrunc,noerror status=progress
-fi
-sudo diskutil unmountDisk "$2"
+sudo diskutil unmountDisk "$1"
+mkdir -p /mnt/raspios
+mount "$1" /mnt/raspios
+touch /mnt/raspios/ssh
+sudo diskutil unmountDisk "$1"
