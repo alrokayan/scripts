@@ -369,7 +369,6 @@ function binInstall() {
 #######################################
 #######################################
 function FixFlannel() {
-  echo "-- Fixing flannel/cni NIC on all nodes" 
   for IP in "${NODE_ARRAY[@]}"; do
     (
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
@@ -959,9 +958,9 @@ ____EOF____
     FixDNS
     echo "-- Installing prometheus-operator and metrics-server" 
     # DEFAULT VALUES: https://github.com/truecharts/charts/blob/master/charts/system/prometheus-operator/values.yaml
-    ( helm upgrade --install prometheus-operator oci://tccr.io/truecharts/prometheus-operator --namespace=kube-network ) &
+    ( helm upgrade --install prometheus-operator oci://tccr.io/truecharts/prometheus-operator --namespace=kube-network &> /dev/null ) &
     # DEFAULT VALUES: https://github.com/kubernetes-sigs/metrics-server/blob/master/charts/metrics-server/values.yaml
-    ( helm upgrade --install metrics-server metrics-server/metrics-server --set args="{--kubelet-insecure-tls,--kubelet-preferred-address-types=InternalIP,--cert-dir=/tmp}" --set apiService.insecureSkipTLSVerify=true --namespace=kube-network ) &
+    ( helm upgrade --install metrics-server metrics-server/metrics-server --set args="{--kubelet-insecure-tls,--kubelet-preferred-address-types=InternalIP,--cert-dir=/tmp}" --set apiService.insecureSkipTLSVerify=true --namespace=kube-network &> /dev/null ) &
   else
     echo "Please do step 2 before kubernetes cluster is not installed .." 
   fi
