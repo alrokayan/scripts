@@ -17,9 +17,9 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-raspios-enable-ssh.sh /dev/disk4
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-install-ext4-and-raspios-enable-ssh.sh /dev/disk4
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-raspios-enable-ssh.sh | bash -s -- /dev/disk4
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-install-ext4-and-raspios-enable-ssh.sh | bash -s -- /dev/disk4
 # $1 Path to disk
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <path-to-disk>"
@@ -33,22 +33,26 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 TMP_MNT_PATH="tmp/raspios"
 sudo diskutil unmountDisk "$1"
+rmdir "$TMP_MNT_PATH"
 if mkdir "$TMP_MNT_PATH"; then
     BASE_PATH=$(printf "%q\n" "$(pwd)")
     if ! [ -f tmp/ext4fuse/ext4fuse ]; then
         mkdir -p tmp
         cd tmp || exit
+        rm -f pkgconfig.tgz
         curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz -o pkgconfig.tgz
+        rm -rf pkg-config-0.29
         tar -zxf pkgconfig.tgz
         cd pkg-config-0.29 || exit
-        ./configure && make install
+        ./configure --with-internal-glib && make install
         cd "$BASE_PATH/tmp" || exit
+        rm -rf ext4fuse
         git clone https://github.com/gerard/ext4fuse.git
         cd ext4fuse || exit
         make
     fi
     cd "$BASE_PATH" || exit
-    ./ext4fuse/ext4fuse "$1" $TMP_MNT_PATH -o allow_other
+    ./tmp/ext4fuse/ext4fuse "$1" $TMP_MNT_PATH -o allow_other
     touch "$TMP_MNT_PATH/ssh"
     sudo diskutil unmountDisk "$1"
     rm -rf "$TMP_MNT_PATH"
