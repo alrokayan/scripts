@@ -30,8 +30,10 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
+TMP_MNT_PATH="tmp/raspios"
 sudo diskutil unmountDisk "$1"
-mkdir -p /mnt/raspios
-mount "$1" /mnt/raspios
-touch /mnt/raspios/ssh
+mkdir -p "$TMP_MNT_PATH"
+sudo mount "$1" "$TMP_MNT_PATH"
+touch "$TMP_MNT_PATH/ssh"
 sudo diskutil unmountDisk "$1"
+rm -rf "$TMP_MNT_PATH"
