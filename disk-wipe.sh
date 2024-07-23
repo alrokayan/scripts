@@ -22,7 +22,7 @@
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-wipe.sh | bash -s -- /dev/disk4 exfat
 # $1 Path to disk
 # $2 File system
-if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <path-to-disk> <file-system>"
     echo "EXAMPLE: $0 /dev/disk4 exfat"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then

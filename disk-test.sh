@@ -22,7 +22,7 @@
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-test.sh | bash -s -- /mnt /root
 # $1 Path to test
 # $2 Path to save
-if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <Path to test> <Path to save>"
     echo "EXAMPLE: $0 /mnt /root"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
