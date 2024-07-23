@@ -26,10 +26,10 @@ if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <path-to-image> <path-to-disk>"
     echo "EXAMPLE: $0 /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo "This script will 
+        echo "This script will write the image to the disk."
         exit 0
     fi
     exit 1
 fi
-sudo diskutil unmountDisk $2
-pv -tpreb $1 | sudo dd of=$2 bs=4096 conv=notrunc,noerror
+sudo diskutil unmountDisk "$2"
+pv -tpreb "$1" | sudo dd of="$"2 bs=4096 conv=notrunc,noerror
