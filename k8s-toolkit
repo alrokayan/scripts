@@ -568,13 +568,11 @@ function step0() {
       kubectl delete node "$i" --all --force --grace-period=0
     done
   fi
-
   echo "-- Uninstalling (reset kubeadm, firewall, files, network) on all nodes" 
   for IP in "${NODE_ARRAY[@]}"; do
     (
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
 #!/bin/bash
-
 echo "-- $HOSTNAME: Uninstalling"
 if command -v kubeadm &> /dev/null; then
     echo "-- $HOSTNAME: Resting k8s"
@@ -592,7 +590,16 @@ rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 rm -f /etc/apt/trusted.gpg.d/adoptium.gpg
 rm -f /etc/apt/sources.list.d/kubernetes.list
 rm -f /etc/apt/sources.list.d/adoptium.list
+echo "-- $HOSTNAME: apt update autoremove autoclean"
 apt update -y
+apt autoremove -y --purge
+apt autoclean -y
+apt clean -y
+echo "-- $HOSTNAME: deleting leftover NICs"
+for nic in $(ip link show | grep -e ": lxc" -e ": cali" -e ": cilium" -e ": flannel" -e ": tunl" -e ": cni" -e ": cbr" | awk -F@ '{print $1}' | awk '{print $2}'); do
+  ip link set $nic down
+  ip link delete $nic
+done
 echo "-- $HOSTNAME: Unmounting and deleting containerd, kubelet, cni, etcd and other kubernetes files and folders"
 umount -f /var/run/containerd/*/*/*/* 
 umount -f /var/lib/kubelet/*/*/*/*/* 
@@ -621,16 +628,7 @@ rm -f /etc/modules-load.d/kubernetes.conf
 rm -f /etc/sysctl.d/98-kubernetes.conf
 sysctl --system 
 sed -i '/.*DNSStubListener=no.*/ c\#DNSStubListener=' /etc/systemd/resolved.conf
-echo "-- $HOSTNAME: apt update autoremove autoclean"
-apt update -y
-apt autoremove -y --purge 
-apt autoclean -y 
-apt clean -y 
-echo "-- $HOSTNAME: deleting leftover NICs"
-for nic in $(ip link show | grep -e ": lxc" -e ": cali" -e ": cilium" -e ": flannel" -e ": tunl" -e ": cni" -e ": cbr" | awk -F@ '{print $1}' | awk '{print $2}'); do
-  ip link set $nic down
-  ip link delete $nic
-done
+systemctl restart systemd-resolved.service
 echo "-- $HOSTNAME: Uninstall Completed"
 ____EOF____
     ) &
@@ -703,12 +701,18 @@ apt install -y \
     gpg \
     sudo \
     wget \
+    dirmngr \
     gnupg \
+    software-properties-common \
+    ipvsadm \
     util-linux \
     coreutils \
     git \
+    rclone \
     nano \
-    cifs-utils 
+    jq \
+    cifs-utils \
+    openvswitch-switch 
 echo "-- $HOSTNAME: Enabling kernel modules, ip forwarding and disabling DNSStubListener"
 echo 'overlay
 br_netfilter' > /etc/modules-load.d/kubernetes.conf
