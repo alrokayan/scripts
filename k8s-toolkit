@@ -911,7 +911,7 @@ mkdir -p /opt/cni/bin
 curl -s -L "https://github.com/containernetworking/plugins/releases/download/v1.5.0/cni-plugins-linux-$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)"-v1.5.0.tgz | tar xzf - -C /opt/cni/bin
 chown -R "$(id -un)":"$(id -gn)" /opt/cni
 ____EOF____
-      i++
+      i=$((i + 1))
     done
     wait
     
