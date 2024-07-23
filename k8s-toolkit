@@ -564,8 +564,8 @@ function step0() {
     unDeployAll
     for i in $(kubectl get nodes -o name | cut -c 6-); do
       echo "-- Draining and deleting $i" 
-      kubectl drain "$i" --ignore-daemonsets --force --grace-period=0
-      kubectl delete node "$i" --ignore-daemonsets --all --force --grace-period=0
+      kubectl drain "$i" --force --grace-period=0
+      kubectl delete node "$i" --all --force --grace-period=0
     done
   fi
 
