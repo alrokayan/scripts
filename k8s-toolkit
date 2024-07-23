@@ -860,19 +860,24 @@ function step3() {
   echo "-- Updating helm repos" 
   helm repo update
   if [ -f "$KUBECONFIG" ]; then
-    ## Allow master node to schedule pods
-    if [ ${#NODE_ARRAY[@]} -eq 1 ] || [ "$MASTER_SCHEDULE" == "y" ]; then
-      echo "-- Allowing master node to schedule app ..." 
-      MASTER_HOSTNAME=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"${NODE_ARRAY[0]}" hostname)
-      kubectl taint nodes "$MASTER_HOSTNAME" node-role.kubernetes.io/control-plane:NoSchedule-
-    fi
     ## Create namespaces
     echo "-- Creating kube-network namespaces" 
     kubectl create ns kube-network
     kubectl label --overwrite ns kube-network pod-security.kubernetes.io/enforce=privileged
-    echo "-- Creating subnet.env and downloading cni binaries on all nodes" 
     i=0
     for IP in "${NODE_ARRAY[@]}"; do
+      NODE_HOSTNAME=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" hostname)
+      ## Allow master node to schedule pods
+      if [ "$i" == 0 ]; then
+        if [ ${#NODE_ARRAY[@]} -eq 1 ] || [ "$MASTER_SCHEDULE" == "y" ]; then
+          echo "-- Allowing master node to schedule app ..." 
+          MASTER_HOSTNAME=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" hostname)
+          kubectl taint nodes "$MASTER_HOSTNAME" node-role.kubernetes.io/control-plane:NoSchedule-
+        fi
+      fi
+      echo "-- $NODE_HOSTNAME: Labeling host=$NODE_HOSTNAME"
+      kubectl label nodes "$NODE_HOSTNAME" host="$NODE_HOSTNAME"
+      echo "-- $NODE_HOSTNAME: Create subnet.env and download cni binaries"
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" i="$i" bash <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: Creating subnet.env"
