@@ -32,4 +32,4 @@ if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 sudo diskutil unmountDisk "$2"
-pv -tpreb "$1" | sudo dd of="$"2 bs=4096 conv=notrunc,noerror
+sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
