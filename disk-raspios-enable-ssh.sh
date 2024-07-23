@@ -26,6 +26,7 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "EXAMPLE: $0 /dev/disk4"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "This script will enable ssh in raspios disk"
+        echo "For mac you have to download and install MacFuse (https://osxfuse.github.io) or install via brew (brew install ext4fuse)"
         exit 0
     fi
     exit 1
@@ -33,7 +34,12 @@ fi
 TMP_MNT_PATH="tmp/raspios"
 sudo diskutil unmountDisk "$1"
 if mkdir "$TMP_MNT_PATH"; then
-    sudo mount "$1" "$TMP_MNT_PATH"
+    mkdir -p tmp
+    cd tmp || exit
+    git clone https://github.com/gerard/ext4fuse.git
+    cd ext4fuse || exit
+    make
+    ./ext4fuse "$1" $TMP_MNT_PATH -o allow_other
     touch "$TMP_MNT_PATH/ssh"
     sudo diskutil unmountDisk "$1"
     rm -rf "$TMP_MNT_PATH"
