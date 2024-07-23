@@ -17,20 +17,22 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-dd-remote-image.sh /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-dd-remote-image.sh https://downloads.raspberrypi.com/raspios_full_arm64/images/raspios_full_arm64-2024-07-04/2024-07-04-raspios-bookworm-arm64-full.img.xz /dev/disk4
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-dd-remote-image.sh | bash -s -- /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4
-# $1 Path to image
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-dd-remote-image.sh | bash -s -- https://downloads.raspberrypi.com/raspios_full_arm64/images/raspios_full_arm64-2024-07-04/2024-07-04-raspios-bookworm-arm64-full.img.xz /dev/disk4
+# $1 Image URL
 # $2 Path to disk
 if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "Usage: $0 <path-to-image> <path-to-disk>"
-    echo "EXAMPLE: $0 /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4"
+    echo "Usage: $0 <image-url> <path-to-disk>"
+    echo "EXAMPLE: $0 https://downloads.raspberrypi.com/raspios_full_arm64/images/raspios_full_arm64-2024-07-04/2024-07-04-raspios-bookworm-arm64-full.img.xz /dev/disk4"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "This script will write the image to the disk."
         exit 0
     fi
     exit 1
 fi
+mkdir -p tmp
+curl -fL -o tmp/image.img.xz "$1"
 sudo diskutil unmountDisk "$2"
-sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
+sudo dd if=tmp/image.img.xz of="$2" bs=4M conv=notrunc,noerror status=progress
 sudo diskutil unmountDisk "$2"
