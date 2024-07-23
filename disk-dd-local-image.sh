@@ -20,6 +20,7 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-dd-local-image.sh https://downloads.raspberrypi.com/raspios_full_arm64/images/raspios_full_arm64-2024-07-04/2024-07-04-raspios-bookworm-arm64-full.img.xz /dev/disk4
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-dd-local-image.sh | bash -s -- https://downloads.raspberrypi.com/raspios_full_arm64/images/raspios_full_arm64-2024-07-04/2024-07-04-raspios-bookworm-arm64-full.img.xz /dev/disk4
+# $1 Path to image
 # $2 Path to disk
 if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <path-to-image> <path-to-disk>"
@@ -30,6 +31,16 @@ if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
+if [ "${1##*.}" != "img" ]; then
+    DIR="$(dirname "${1}")"
+    FILE="$(basename "${1}")"
+    FILE_IMG="${FILE%.*}"
+    IMAGE_FILE="$DIR/$FILE_IMG"
+    echo "Extracting $DIR/$FILE_IMG, please wait..."
+    gunzip -vf "$1"
+else
+    IMAGE_FILE="$1"
+fi
 sudo diskutil unmountDisk "$2"
-sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
+sudo dd if="$IMAGE_FILE" of="$2" bs=4M conv=notrunc,noerror status=progress
 sudo diskutil unmountDisk "$2"
