@@ -449,7 +449,7 @@ ____EOF____
 #######################################
 function unDeploy() {
   echo "-- Uninstalling apps" 
-  NSLIST="$(kubectl get namespaces -o name | grep -v kube- | cut -c 11-) & pid=$!"
+  NSLIST="$(kubectl get namespaces -o name | grep -v kube- | cut -c 11-)"
   for ns in $NSLIST; do
     echo "-- Uninstalling all resources in $ns " 
     (
