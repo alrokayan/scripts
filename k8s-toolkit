@@ -238,7 +238,7 @@ fi
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 10
   WAIT_ALL_NODES_ONLINE "${NODE_ARRAY[@]}"
 }
 
@@ -382,7 +382,7 @@ systemctl restart kubelet
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 10
 }
 
 #######################################
@@ -503,7 +503,7 @@ for nic in $(ip link show | grep -e ": cni" -e ": flannel" | awk -F@ '{print $1}
   ip link delete $nic
 done
 echo "-- $HOSTNAME: Force stopping cni demon"
-kill -9 $(ps aux | grep "/opt/cni/bin" | awk '{print $2}')
+kill -9 $(ps aux | grep -v "grep" | grep -e "/opt/cni/bin" | awk '{print $2}')
 echo "-- $HOSTNAME: Deleting cni files"
 rm -rf /run/flannel
 rm -rf /opt/cni
@@ -513,7 +513,7 @@ rm -rf /etc/cni
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 10
   echo "-- Restarting CoreDNS" 
   kubectl delete pod --selector=k8s-app=kube-dns -n kube-system --grace-period=0 --force
   echo "-- Uninstalling Network-Attachment-Definitions" 
@@ -528,7 +528,7 @@ ____EOF____
 function unDeployApps() {
   echo "-- apps uninstall" 
   unDeploy
-  wait
+  wait & sleep 10
   echo "-- Uninstalling Network-Attachment-Definitions" 
   kubectl delete Network-Attachment-Definitions --all -A --grace-period=0 --force
 }
@@ -635,7 +635,7 @@ echo "-- $HOSTNAME: Uninstall Completed"
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 10
   echo "---------------------------------------------------------------" 
 }
 
@@ -660,7 +660,7 @@ ff02::2 ip6-allrouters' >>tmp/hosts
       scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/hosts "$SSH_USERNAME"@"$IP":/etc/
     ) &
   done
-  wait
+  wait & sleep 10
 
   echo "-- Updating, upgrading and installing pre-requisites on all nodes, please wait ..." 
   for IP in "${NODE_ARRAY[@]}"; do
@@ -745,7 +745,7 @@ apt install -y containerd
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 10
 
   if [ "$K8S_VERSION" == "" ]; then
     for IP in "${NODE_ARRAY[@]}"; do
@@ -772,7 +772,7 @@ kubeadm config images pull --kubernetes-version $(echo "$K8S_VERSION" | sed 's/-
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 10
   echo "---------------------------------------------------------------" 
 }
 
@@ -826,7 +826,7 @@ ____EOF____
   for IP in "${NODE_ARRAY[@]}"; do
     (scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$KUBECONFIG" "$SSH_USERNAME"@"$IP":~/.kube/config) &
   done
-  wait
+  wait & sleep 10
   echo "-- Copying join command file to this machine" 
   IS_MASTER=true
   for IP in "${NODE_ARRAY[@]}"; do
@@ -849,7 +849,7 @@ ____EOF____
       ) &
     fi
   done
-  wait  
+  wait & sleep 10  
   echo "---------------------------------------------------------------" 
 }
 
@@ -895,7 +895,7 @@ chown -R "$(id -un)":"$(id -gn)" /opt/cni
 ____EOF____
       i=$((i + 1))
     done
-    wait
+    wait & sleep 10
     if [ "$L2_SWITCH" == "y" ]; then
       FLANNEL_BACKEND="host-gw"
     else
@@ -917,7 +917,7 @@ ____EOF____
     curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/reference-deployment/master/multus-dhcp/dhcp-daemonset.yml -o tmp/dhcp-daemonset.yml
     sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
     kubectl apply -n kube-network -f tmp/dhcp-daemonset.yml
-    wait
+    wait & sleep 10
     sleep 5
     echo "-- Restarting CoreDNS" 
     kubectl delete pod --selector=k8s-app=kube-dns -n kube-system --grace-period=0 --force
