@@ -32,5 +32,4 @@ if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 sudo diskutil unmountDisk $2
-(pv -n $1 | sudo dd of=$2 bs=128M conv=notrunc,noerror) 2>&1 \
-| dialog --gauge "Running dd command (cloning), please wait..." 10 70 0
+pv -tpreb $1 | sudo dd of=$2 bs=4096 conv=notrunc,noerror
