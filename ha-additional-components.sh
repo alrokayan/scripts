@@ -44,3 +44,4 @@ frontend:
     - /local/auto-entities.js
 ' >> configuration.yaml
 fi
+cat configuration.yaml
