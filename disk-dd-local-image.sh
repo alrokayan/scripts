@@ -31,16 +31,12 @@ if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
-if [ "${1##*.}" != "img" ]; then
-    DIR="$(dirname "${1}")"
-    FILE="$(basename "${1}")"
-    FILE_IMG="${FILE%.*}"
-    IMAGE_FILE="$DIR/$FILE_IMG"
-    echo "Extracting $DIR/$FILE_IMG, please wait..."
-    gunzip -vf "$1"
-else
-    IMAGE_FILE="$1"
-fi
 sudo diskutil unmountDisk "$2"
-sudo dd if="$IMAGE_FILE" of="$2" bs=4M conv=notrunc,noerror status=progress
+if [ "${1##*.}" == "img" ] || [ "${1##*.}" == "iso" ]; then
+    echo "Writing $1 to disk $2, please wait..."
+    sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
+else
+    echo "Extracting $1 and writing to disk $2, please wait..."
+    gunzip --force --verbose --stdout "$1" | sudo dd of="$2" bs=4M conv=notrunc,noerror status=progress
+fi
 sudo diskutil unmountDisk "$2"
