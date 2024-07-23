@@ -655,7 +655,8 @@ ff02::2 ip6-allrouters' >>tmp/hosts
   done
   echo "-- Updating, upgrading and installing pre-requisites on all nodes, please wait ..." 
   for IP in "${NODE_ARRAY[@]}"; do
-    ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
+    (
+      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: Creating folders and setting permissions"
 mkdir -p ~/.kube
@@ -739,7 +740,9 @@ apt install -y temurin-21-jre
 echo "-- $HOSTNAME: Installing containerd"
 apt install -y containerd
 ____EOF____
+    ) &
   done
+  wait
   if [ "$K8S_VERSION" == "" ]; then
     for IP in "${NODE_ARRAY[@]}"; do
       DEFAULT_VERSION=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "apt-cache policy kubeadm | grep Candidate | awk '{print \$2}'")
