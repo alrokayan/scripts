@@ -31,32 +31,54 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
-TMP_MNT_PATH="tmp/raspios"
-sudo diskutil unmountDisk "$1"
-rmdir "$TMP_MNT_PATH"
-if mkdir "$TMP_MNT_PATH"; then
-    BASE_PATH=$(printf "%q\n" "$(pwd)")
-    if ! [ -f tmp/ext4fuse/ext4fuse ]; then
-        mkdir -p tmp
-        cd tmp || exit
-        rm -f pkgconfig.tgz
-        curl https://pkgconfig.freedesktop.org/releases/pkg-config-0.29.tar.gz -o pkgconfig.tgz
-        rm -rf pkg-config-0.29
-        tar -zxf pkgconfig.tgz
-        cd pkg-config-0.29 || exit
-        ./configure --with-internal-glib && make install
-        cd "$BASE_PATH/tmp" || exit
-        rm -rf ext4fuse
-        git clone https://github.com/gerard/ext4fuse.git
-        cd ext4fuse || exit
-        make
+TMP_MNT_PATH="/Users/alrokayan/raspios"
+diskutil unmountDisk "$1"
+for mount_point in $(df | grep -e raspios | awk '{print $9}'); do
+    echo " -- Unmounting $mount_point"
+    umount -f -v "$mount_point"
+done
+df -h
+if [[ "$(uname -s)" == *"Darwin"* ]]; then
+    echo " -- Mac OS detected"
+    EXT4FUSE_EXE="/opt/ext4fuse/ext4fuse"
+    if ! [ -f "$EXT4FUSE_EXE" ]; then
+        if ! command -v brew &> /dev/null; then
+            /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+            (echo; echo 'eval "$(/opt/homebrew/bin/brew shellenv)"') >> /Users/alrokayan/.zprofile
+            eval "$(/opt/homebrew/bin/brew shellenv)"
+        fi
+        brew install --cask macfuse
+        brew install pkg-config
+        EXT4FUSE_DIR_PATH="$(dirname "$EXT4FUSE_EXE")"
+        rm -rf "$EXT4FUSE_DIR_PATH"
+        mkdir -p "$EXT4FUSE_DIR_PATH"
+        git clone https://github.com/gerard/ext4fuse.git "$EXT4FUSE_DIR_PATH"
+        make -C "$EXT4FUSE_DIR_PATH"
     fi
-    cd "$BASE_PATH" || exit
-    ./tmp/ext4fuse/ext4fuse "$1" $TMP_MNT_PATH -o allow_other
+    echo "-- Running: $EXT4FUSE_EXE $1 $TMP_MNT_PATH -o allow_other,uid=$(id -u),gid=$(id -g),force"
+    rmdir "$TMP_MNT_PATH"
+    mkdir "$TMP_MNT_PATH"
+    $EXT4FUSE_EXE "$1" "$TMP_MNT_PATH" -o allow_other,uid="$(id -u)",gid="$(id -g)",force
+fi
+if [[ "$(uname -s)" == *"Linux"* ]]; then
+    echo " -- Linux OS detected" 
+    echo "-- Running: mount -t ext4 $1 $TMP_MNT_PATH"
+    rmdir "$TMP_MNT_PATH"
+    mount -t ext4 "$1" "$TMP_MNT_PATH"
+fi
+if df | grep "$TMP_MNT_PATH"; then
+    echo " -- Disk mounted successfully"
+    df -h
     touch "$TMP_MNT_PATH/ssh"
-    sudo diskutil unmountDisk "$1"
-    rm -rf "$TMP_MNT_PATH"
+    ls -al "$TMP_MNT_PATH"
+    diskutil unmountDisk "$1"
+    for mount_point in $(df | grep -e raspios | awk '{print $9}'); do
+        echo " -- Unmounting $mount_point"
+        umount -f -v "$mount_point"
+        rmdir "$TMP_MNT_PATH"
+    done
+    df -h
 else
-    echo "-- Error while creating $TMP_MNT_PATH"
+    echo " -- Error while mounting disk"
     exit 1
 fi
