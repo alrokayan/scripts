@@ -1082,8 +1082,6 @@ while $CONTINUE; do
   k) ## k9S - Monitor K8s cluster status
     echo "-- Running k9s" 
     copyKubeconfig
-    kubectl version
-    k9s version
     k9s -A
     END_OF_SCRIPT
     ;;
@@ -1136,6 +1134,8 @@ while $CONTINUE; do
     echo "-- Step 2 (cluster creation) completed" 
     step3
     echo "-- Step 3 (network deployment) completed" 
+    echo "-- Running k9s"
+    k9s -A
     END_OF_SCRIPT
     ;;
   *) ## Invalid option
