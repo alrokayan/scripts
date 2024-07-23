@@ -20,7 +20,8 @@
 # rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./k8s-toolkit .env
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-toolkit | bash -s -- .env
-# ./.shellcheckrc
+# shellcheck disable=SC1090
+# shellcheck disable=SC2154
 # $1 Enviroment file (optional) (default: .env)
 if [ -z "$1" ]; then
   ENV_FILE=".env"
@@ -34,7 +35,6 @@ mkdir -p tmp
 if ! grep "export SSH_EXTRA_ARGS=" "$ENV_FILE"; then
   echo 'export SSH_EXTRA_ARGS="-o StrictHostKeyChecking=no"' >> "$ENV_FILE"
 fi
-# shellcheck source=/path/to/env_file
 source "$ENV_FILE"
 cat "$ENV_FILE"
 if [ -f "$KUBECONFIG" ]; then
@@ -50,78 +50,7 @@ MASTER_SCHEDULE_DEFAULT="n" && export MASTER_SCHEDULE_DEFAULT
 TZ_DEFAULT="Etc/GMT" && export TZ_DEFAULT
 SSH_USERNAME_DEFAULT="root" && export SSH_USERNAME_DEFAULT
 PRIVATE_KEY_DEFAULT="$HOME/.ssh/id_rsa" && export PRIVATE_KEY_DEFAULT
-CSV_FILE_DEFAULT="$(printf "%q\n" "$(pwd)")/deploy.csv" && export CSV_FILE_DEFAULT
-## DEFAULT VALUES FOR STEP 4 (GENERATE EXAMPLE CSV FILE)
-CSV_MASTER_NIC_DEFAULT="eth0"
-CSV_NFS_SERVER_DEFAULT="10.0.0.1"
-CSV_NFS_PATH_DEFAULT="/mnt/kube-volumes"
-CSV_LARGE_NFS_PATH_DEFAULT="/mnt/hdd"
-CSV_IP_DEFAULT=10.99.0.50
-CSV_CIDR_DEFAULT=24
-CSV_GW_DEFAULT=10.99.0.1
-CSV_DNS1_DEFAULT=1.1.1.1
-CSV_DNS2_DEFAULT=8.8.8.8
 
-
-#######################################
-#######################################
-### FUNCTION deployFileCreation #######
-#######################################
-#######################################
-function deployFileCreation() {
-  if [ ! -f "$CSV_FILE" ]; then
-    if $CONTINUE; then
-      unset READ_VAR_ASK
-    else
-      READ_VAR_ASK=1
-    fi
-    readVar CSV_MASTER_NIC "$CSV_MASTER_NIC_DEFAULT" "What's your default network interface (run \"ip a\" in the master node to get the list)?" $READ_VAR_ASK 
-    readVar CSV_NFS_SERVER "$CSV_NFS_SERVER_DEFAULT" "What's your NFS server?" $READ_VAR_ASK 
-    readVar CSV_NFS_PATH "$CSV_NFS_PATH_DEFAULT" "What's the NFS server's path where all volumes are?" $READ_VAR_ASK 
-    readVar CSV_LARGE_NFS_PATH "$CSV_LARGE_NFS_PATH_DEFAULT" "What's the NFS server's path where all large files (media and downloads) are?" $READ_VAR_ASK 
-    readVar CSV_IP "$CSV_IP_DEFAULT" "Give example of a valid local IP?" $READ_VAR_ASK 
-    readVar CSV_CIDR "$CSV_CIDR_DEFAULT" "What's the CIDR suffex for $CSV_IP?" $READ_VAR_ASK 
-    export CSV_CIDR="${CSV_CIDR//$'/'/}"
-    readVar CSV_GW "$CSV_GW_DEFAULT" "What's the gateway for $CSV_IP?" $READ_VAR_ASK 
-    readVar CSV_DNS1 "$DNS1" "What's the DNS1 for $CSV_IP?" $READ_VAR_ASK 
-    readVar CSV_DNS2 "$DNS2" "hat's the DNS2 for $CSV_IP?" $READ_VAR_ASK 
-    if [ "$CSV_MASTER_NIC" == "" ]; then CSV_MASTER_NIC=$CSV_MASTER_NIC_DEFAULT; fi
-    if [ "$CSV_LARGE_NFS_PATH" == "" ]; then CSV_LARGE_NFS_PATH=$CSV_LARGE_NFS_PATH_DEFAULT; fi
-    if [ "$CSV_NFS_SERVER" == "" ]; then CSV_NFS_SERVER=$CSV_NFS_SERVER_DEFAULT; fi
-    if [ "$CSV_NFS_PATH" == "" ]; then CSV_NFS_PATH=$CSV_NFS_PATH_DEFAULT; fi
-    if [ "$CSV_IP" == "" ]; then CSV_IP=$CSV_IP_DEFAULT; fi
-    if [ "$CSV_CIDR" == "" ]; then CSV_CIDR=$CSV_CIDR_DEFAULT; fi
-    if [ "$CSV_GW" == "" ]; then CSV_GW=$CSV_GW_DEFAULT; fi
-    if [ "$CSV_DNS1" == "" ]; then CSV_DNS1=$CSV_DNS1_DEFAULT; fi
-    if [ "$CSV_DNS2" == "" ]; then CSV_DNS2=$CSV_DNS2_DEFAULT; fi
-    cat <<EOF >"$CSV_FILE"
-app_name,helm_truechart,storage_name,storage_enabled,storage_path,storage_subPath,storage_server,storage_type,storage_mountPath,nw_master_nic,nw_mac,nw_address_with_subnet,nw_gateway,nw_dns1,nw_dns2,run_as_user,run_as_group,privileged,extra_helm_values
-plex,plex,config,true,$CSV_NFS_PATH/plex,config,$CSV_NFS_SERVER,nfs,/config,,,,,,,,,,
-plex,plex,movies,true,$CSV_LARGE_NFS_PATH/Media,Movies,$CSV_NFS_SERVER,nfs,/Movies,,,,,,,,,,
-plex,plex,tv,true,$CSV_LARGE_NFS_PATH/Media,TV,$CSV_NFS_SERVER,nfs,/TV,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 1)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,0,0,true,
-radarr,radarr,config,true,$CSV_NFS_PATH/radarr,config,$CSV_NFS_SERVER,nfs,/config,,,,,,,,,,
-radarr,radarr,movies,true,$CSV_LARGE_NFS_PATH/Media,Movies,$CSV_NFS_SERVER,nfs,/movies,,,,,,,,,,
-radarr,radarr,downloads,true,$CSV_LARGE_NFS_PATH/Downloads,,$CSV_NFS_SERVER,nfs,/downloads,$CSV_MASTER_NIC,$(printf '00:2F:60:%02X:%02X:%02X\n' "$(shuf -i 0-99 -n 1)" "$(shuf -i 101-199 -n 1)" "$(shuf -i 201-256 -n 1)"),,,,,0,0,true,
-sonarr,sonarr,config,true,$CSV_NFS_PATH/sonarr,config,$CSV_NFS_SERVER,nfs,/config,,,,,,,,,,
-sonarr,sonarr,tv,true,$CSV_LARGE_NFS_PATH/Media,TV,$CSV_NFS_SERVER,nfs,/tv,,,,,,,,,,
-sonarr,sonarr,downloads,true,$CSV_LARGE_NFS_PATH/Downloads,,$CSV_NFS_SERVER,nfs,/downloads,$CSV_MASTER_NIC,$(printf '00:2F:60:%02X:%02X:%02X\n' "$(shuf -i 0-99 -n 1)" "$(shuf -i 101-199 -n 1)" "$(shuf -i 201-256 -n 1)"),,,,,0,0,true,
-sabnzbd,sabnzbd,config,true,$CSV_NFS_PATH/sabnzbd,config,$CSV_NFS_SERVER,nfs,/config,,,,,,,,,,
-sabnzbd,sabnzbd,downloads,true,$CSV_LARGE_NFS_PATH/Downloads,,$CSV_NFS_SERVER,nfs,/downloads,$CSV_MASTER_NIC,$(printf '00:2F:60:%02X:%02X:%02X\n' "$(shuf -i 0-99 -n 1)" "$(shuf -i 101-199 -n 1)" "$(shuf -i 201-256 -n 1)"),,,,,0,0,true,
-overseerr,overseerr,config,true,$CSV_NFS_PATH/overseerr,config,$CSV_NFS_SERVER,nfs,/app/config,$CSV_MASTER_NIC,$(printf '00:2F:60:%02X:%02X:%02X\n' "$(shuf -i 0-99 -n 1)" "$(shuf -i 101-199 -n 1)" "$(shuf -i 201-256 -n 1)"),,,,,0,0,true,
-code-server,code-server,config,true,$CSV_NFS_PATH/code-server,config,$CSV_NFS_SERVER,nfs,/config,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 1)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,0,0,true,
-netbootxyz,netbootxyz,config,true,$CSV_NFS_PATH/netbootxyz,config,$CSV_NFS_SERVER,nfs,/config,,,,,,,,,,
-netbootxyz,netbootxyz,assets,true,$CSV_NFS_PATH/netbootxyz,assets,$CSV_NFS_SERVER,nfs,/assets,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP "2)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,0,0,true,
-homepage,homepage,config,true,$CSV_NFS_PATH/homepage,config,$CSV_NFS_SERVER,nfs,/app/config,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 3)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,,,,
-home-assistant,home-assistant,config,true,$CSV_NFS_PATH/home-assistant,config,$CSV_NFS_SERVER,nfs,/config,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 4)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,0,0,true,--set cnpg.main.enabled=false --set configmap.init.enabled=false --set persistence.init.enabled=false --set workload.main.podSpec.initContainers.init.enabled=false
-mosquitto,mosquitto,data,true,$CSV_NFS_PATH/mosquitto,data,$CSV_NFS_SERVER,nfs,/mosquitto/data,,,,,,,,,,
-mosquitto,mosquitto,mosquitto-config,false,,,,,,,,,,,,,,,
-mosquitto,mosquitto,configinc,false,,,,,,,,,,,,,,,
-mosquitto,mosquitto,config,true,$CSV_NFS_PATH/mosquitto,config,$CSV_NFS_SERVER,nfs,/mosquitto/config,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 5)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,,,,
-zigbee2mqtt,zigbee2mqtt,data,true,$CSV_NFS_PATH/zigbee2mqtt,data,$CSV_NFS_SERVER,nfs,/data,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 6)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,0,0,true,--set workload.main.podSpec.initContainers.init-config.enabled=false --set containers.main.env.USE_CUSTOM_CONFIG_FILE=true
-node-red,node-red,data,true,$CSV_NFS_PATH/node-red,data,$CSV_NFS_SERVER,nfs,/data,$CSV_MASTER_NIC,,$(NEXT_IP "$CSV_IP" 7)/$CSV_CIDR,$CSV_GW,$CSV_DNS1,$CSV_DNS2,0,0,true,
-EOF
-  fi
-}
 #######################################
 #######################################
 ###### FUNCTION copyKubeconfig ########
@@ -364,26 +293,32 @@ function binInstall() {
       echo "-- OS: Linux - CHECKING BINARIES" 
     fi
     if ! command -v helm &> /dev/null || $force_install_bin; then
+      rm -rf tmp/helm.tar.gz tmp/linux-"$(dpkg --print-architecture)"
       curl -L https://get.helm.sh/helm-v3.15.2-linux-"$(dpkg --print-architecture)".tar.gz -o tmp/helm.tar.gz
       tar -zxf tmp/helm.tar.gz -C tmp
+      sudo rm -f /usr/local/bin/helm
       sudo mv tmp/linux-"$(dpkg --print-architecture)"/helm /usr/local/bin/
       sudo chmod +x /usr/local/bin
       if command -v helm &> /dev/null; then echo "-- helm installed successfully" ; fi
     fi
     if ! command -v kubectl &> /dev/null || $force_install_bin; then
+      sudo rm -f /usr/local/bin/kubectl
       sudo curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/$(dpkg --print-architecture)/kubectl" -o /usr/local/bin/kubectl
       sudo chmod +x /usr/local/bin/kubectl
       if command -v kubectl &> /dev/null; then echo "-- kubectl installed successfully" ; fi
     fi
     if ! command -v jq &> /dev/null || $force_install_bin; then
+      sudo rm -f /usr/local/bin/jq
       sudo curl -L "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-linux-$(dpkg --print-architecture)" -o /usr/local/bin/jq
       sudo chmod +x /usr/local/bin/jq
       if command -v jq &> /dev/null; then echo "-- jq installed successfully" ; fi
     fi
     if ! command -v k9s &> /dev/null || $force_install_bin; then
+      rm -rf tmp/k9s.tar.gz tmp/k9s
       curl -L https://github.com/derailed/k9s/releases/download/v0.32.5/k9s_Linux_"$(dpkg --print-architecture)".tar.gz -o tmp/k9s.tar.gz
       mkdir tmp/k9s
       tar -zxf tmp/k9s.tar.gz -C tmp/k9s
+      sudo rm -f /usr/local/bin/k9s
       sudo mv tmp/k9s/k9s /usr/local/bin/
       sudo chmod +x /usr/local/bin/k9s
       if command -v k9s &> /dev/null; then echo "-- k9s installed successfully" ; fi
@@ -396,26 +331,32 @@ function binInstall() {
       echo "-- OS: macOS - CHECKING BINARIES" 
     fi
     if ! command -v helm &> /dev/null || $force_install_bin; then
+      rm -rf tmp/helm.tar.gz tmp/linux-"$(dpkg --print-architecture)"
       curl -L "https://get.helm.sh/helm-v3.15.2-darwin-$(arch).tar.gz" -o tmp/helm.tar.gz
       tar -zxf tmp/helm.tar.gz -C tmp
+      sudo rm -f /usr/local/bin/helm
       sudo mv tmp/darwin-"$(arch)"/helm /usr/local/bin/
       sudo chmod +x /usr/local/bin/helm
       if command -v helm &> /dev/null; then echo "-- helm installed successfully" ; fi
     fi
     if ! command -v kubectl &> /dev/null || $force_install_bin; then
+      sudo rm -f /usr/local/bin/kubectl
       sudo curl -L "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/darwin/$(arch)/kubectl" -o /usr/local/bin/kubectl
       sudo chmod +x /usr/local/bin/kubectl
       if command -v kubectl &> /dev/null; then echo "-- kubectl installed successfully" ; fi
     fi
     if ! command -v jq &> /dev/null || $force_install_bin; then
+      sudo rm -f /usr/local/bin/jq
       sudo curl -L "https://github.com/jqlang/jq/releases/download/jq-1.7.1/jq-macos-$(arch)" -o /usr/local/bin/jq
       sudo chmod +x /usr/local/bin/jq
       if command -v jq &> /dev/null; then echo "-- jq installed successfully" ; fi
     fi
     if ! command -v k9s &> /dev/null || $force_install_bin; then
+      rm -rf tmp/k9s.tar.gz tmp/k9s
       curl -L "https://github.com/derailed/k9s/releases/download/v0.32.5/k9s_Darwin_$(arch).tar.gz" -o tmp/k9s.tar.gz
       mkdir tmp/k9s
       tar -zxf tmp/k9s.tar.gz -C tmp/k9s
+      sudo rm -f /usr/local/bin/k9s
       sudo mv tmp/k9s/k9s /usr/local/bin/
       sudo chmod +x /usr/local/bin/k9s
       if command -v k9s &> /dev/null; then echo "-- k9s installed successfully" ; fi
@@ -503,12 +444,12 @@ ____EOF____
 
 #######################################
 #######################################
-############ FUNCTION unD #############
+############ FUNCTION unDeploy ########
 #######################################
 #######################################
-function unD() {
+function unDeploy() {
   echo "-- Uninstalling apps" 
-  NSLIST="$(kubectl get namespaces -o name | grep -v kube- | cut -c 11-)"
+  NSLIST="$(kubectl get namespaces -o name | grep -v kube- | cut -c 11-) & pid=$!"
   for ns in $NSLIST; do
     echo "-- Uninstalling all resources in $ns " 
     (
@@ -604,7 +545,7 @@ function END_OF_SCRIPT() {
 #######################################
 #######################################
 function step0() {
-  binInstall
+  binInstall false
   copyKubeconfig
   SWAPRemoval
   for IP in "${NODE_ARRAY[@]}"; do
@@ -612,7 +553,7 @@ function step0() {
     break
   done
   if [[ "$response" != *"000"* ]]; then
-    unD
+    unDeploy
     for i in $(kubectl get nodes -o name | cut -c 6-); do
       echo "-- Draining and deleting $i" 
       kubectl drain "$i" --ignore-daemonsets --force --grace-period=0
@@ -1031,30 +972,6 @@ ____EOF____
 
 ##################################################################################
 ##################################################################################
-function step4() {
-  if [ -f "$CSV_FILE" ]; then
-    echo "Do you want to overwrite $CSV_FILE? (N/y) [TIMEOUT: 30s]" 
-    read -t 30 -r CREATE_DEPLOY_FILE
-  else
-    CREATE_DEPLOY_FILE="y"
-  fi
-  if [[ $CREATE_DEPLOY_FILE == "y" ]]; then
-    rm -f "$CSV_FILE"
-    deployFileCreation
-    echo "-- $CSV_FILE has been created" 
-  fi
-  echo "---------------------------------------------------------------" 
-}
-
-##################################################################################
-##################################################################################
-function step5() {
-  copyKubeconfig
-  curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/kubecsv/main/kubecsv | bash -s -- "$CSV_FILE" Asia/Riyadh "$KUBECONFIG"
-}
-
-##################################################################################
-##################################################################################
 ##################################################################################
 ##################################################################################
 ##################################################################################
@@ -1083,7 +1000,7 @@ while ! IS_ALL_NODES_ONLINE "$NODE_ARRAY"; do
   source "$ENV_FILE"
 done
 readVar SSH_USERNAME "$SSH_USERNAME_DEFAULT" "Please entre the SSH username" 1
-while ! SSH_COPY_ID "${NODE_ARRAY[@]}" "$PRIVATE_KEY" || [ ! -f "$PRIVATE_KEY" ]; do
+while ! SSH_COPY_ID "$PRIVATE_KEY" "$(IFS=' ' ; echo "$NODE_ARRAY" )" || [ ! -f "$PRIVATE_KEY" ]; do
   PRIVATE_KEY="$PRIVATE_KEY_DEFAULT"
   readVar PRIVATE_KEY "$PRIVATE_KEY_DEFAULT" "Please enter the absolute path for your private key. The default value is recommended (will be created if it does not exist)"
 done
@@ -1091,9 +1008,6 @@ readYesNoVar L2_SWITCH "$L2_SWITCH_DEFAULT" "Are all nodes connected to a L2 swi
 readYesNoVar MASTER_SCHEDULE "$MASTER_SCHEDULE_DEFAULT" "Do you want to schedule pods in the master node? (entre y or n)" 1
 if [ ! -f "$KUBECONFIG" ]; then
   readVar KUBECONFIG "$KUBECONFIG_DEFAULT" "Please entre the path for KUBECONFIG (will be created if it does not exist)"
-fi
-if [ ! -f "$CSV_FILE" ]; then
-  readVar CSV_FILE "$CSV_FILE_DEFAULT" "Please entre the path for the csv file (can be created in step4)"
 fi
 readVar CLUSTER_CIDR_FIRST_TWO_OCTETS "$CLUSTER_CIDR_DEFAULT" "Please entre the first two octets of the subnet 16 of the cluster CIDR (10.244 means 10.244.0.0/16)" 1
 readVar KUBE_TZ "$TZ_DEFAULT" "Please entre your Time Zone" 1
@@ -1103,7 +1017,7 @@ binInstall false
 CONTINUE=true
 while $CONTINUE; do
   source "$ENV_FILE"
-  if [ "$1" == "" ]; then
+  if [ "$2" == "" ]; then
     echo "-----------------------------------------------------------" 
     echo "Welcome to K8S TOOLKIT .." 
     echo "-----------------------------------------------------------" 
@@ -1115,25 +1029,23 @@ while $CONTINUE; do
     echo "[1].....Prepare hosts and install pre-requisites (apt install)" 
     echo "[2].....Create kubernetes cluster (kubeadm init)" 
     echo "[3].....Deploy kubernetes network (flannel and multus)" 
-    echo "[4].....Generate example csv file" 
-    echo "[5].....Deploy $$CSV_FILE" 
     echo "-----------------------------------------------------------" 
     echo "-------------------------- TOOLS --------------------------" 
     echo "-----------------------------------------------------------" 
-    echo "(un3)...(un) undo step 3 and 5 (deleting all apps and kube-network)" 
-    echo "(un5)...(un) undo step 5 (deleting all apps)" 
-    echo "(b).....(b) binaries installation locally (helm, kubectl, jq and k9s)" 
-    echo "(k).....(k) k9s - monitor K8s cluster status" 
-    echo "(c).....(c) copy kubeconfig file from the master node" 
-    echo "(n).....(n) network diagnostic tool (dnstools pod deployment)" 
-    echo "(d).....(d) dns fix" 
-    echo "(s).....(s) swap partition removal" 
-    echo "(R).....[R] REBOOT ALL NODES" 
-    echo "(all)...(all) installation steps at once" 
+    echo "(un3)...undo step 3 and 5 (deleting all apps and kube-network)" 
+    echo "(unD)...unDeploy all apps" 
+    echo "(b).....binaries installation locally (helm, kubectl, jq and k9s)" 
+    echo "(k).....k9s - monitor K8s cluster status" 
+    echo "(c).....copy kubeconfig file from the master node" 
+    echo "(n).....network diagnostic tool (dnstools pod deployment)" 
+    echo "(d).....dns fix" 
+    echo "(s).....swap partition removal" 
+    echo "(R).....REBOOT ALL NODES" 
+    echo "(all)...installation steps at once" 
     echo "-----------------------------------------------------------" 
     read -r OPTION
   else
-    OPTION="$1"
+    OPTION="$2"
     CONTINUE=false
   fi
   
@@ -1187,12 +1099,12 @@ while $CONTINUE; do
     ;;
   un5) ## Undeploy deployment
     echo "-- Un-deploying all apps" 
-    unD false
+    unDeploy false
     END_OF_SCRIPT
     ;;
-  un3) ## Undeploy deployment
+  unD) ## Undeploy deployment
     echo "-- Un-deploying all apps including kube-network namespace" 
-    unD
+    unDeploy
     END_OF_SCRIPT
     ;;
   0)
@@ -1215,16 +1127,6 @@ while $CONTINUE; do
     echo "-- Step 3 (network deployment) completed" 
     END_OF_SCRIPT
     ;;
-  4)
-    step4
-    echo "-- Step 4 ($$CSV_FILE creation) completed" 
-    END_OF_SCRIPT
-    ;;
-  5)
-    step5
-    echo "-- Step 5 ($$CSV_FILE deployment) completed" 
-    END_OF_SCRIPT
-    ;;
   all)
     step0
     echo "-- Step 0 (apt uninstall) completed" 
@@ -1234,10 +1136,6 @@ while $CONTINUE; do
     echo "-- Step 2 (cluster creation) completed" 
     step3
     echo "-- Step 3 (network deployment) completed" 
-    step4
-    echo "-- Step 4 ($$CSV_FILE creation) completed" 
-    step5
-    echo "-- Step 5 ($$CSV_FILE deployment) completed" 
     END_OF_SCRIPT
     ;;
   *) ## Invalid option
