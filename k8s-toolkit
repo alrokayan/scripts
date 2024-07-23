@@ -491,7 +491,7 @@ function unDeployAll() {
     kubectl delete all --all --namespace="$ns" --grace-period=0 --force
     kubectl delete ns "kube-network" --grace-period=0 --force
   ) &
-  wait
+  wait & sleep 10
   echo "-- Deleting leftover NICs, and cni files on all nodes" 
   for IP in "${NODE_ARRAY[@]}"; do
     (
@@ -499,8 +499,8 @@ function unDeployAll() {
 #!/bin/bash
 echo "-- $HOSTNAME: deleting leftover NICs"
 for nic in $(ip link show | grep -e ": cni" -e ": flannel" | awk -F@ '{print $1}' | awk '{print $2}'); do
-ip link set $nic down
-ip link delete $nic
+  ip link set $nic down
+  ip link delete $nic
 done
 echo "-- $HOSTNAME: Force stopping cni demon"
 kill -9 $(ps aux | grep "/opt/cni/bin" | awk '{print $2}')
