@@ -17,53 +17,20 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-test.sh /mnt /root
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-image.sh /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-test.sh | bash -s -- /mnt /root
-# $1 Path to test
-# $2 Path to save
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-image.sh | bash -s /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4
+# $1 Path to image
+# $2 Path to disk
 if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "Usage: $0 <Path to test> <Path to save>"
-    echo "EXAMPLE: $0 /mnt /root"
+    echo "Usage: $0 <path-to-image> <path-to-disk>"
+    echo "EXAMPLE: $0 /Users/USER/Downloads/2024-07-04-raspios-bookworm-arm64.img.xz /dev/disk4"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo "This script will test the disk speed"
+        echo "This script will 
         exit 0
     fi
     exit 1
 fi
-TEST_RESULTS_FOLDER="$2/Disk-Test-Results/$(date +%Y_%m_%d_%H_%M)/"
-TEST_LOCATIONS=$1
-mkdir -p "$TEST_RESULTS_FOLDER"
-for i in "${TEST_LOCATIONS[@]}"; do
-    echo "Testing /mnt/$i ..."
-    (
-    TEST_RESULT_FILE="$(echo "/mnt/$i" | tr / _)_TEST_RESULT.txt"
-    cd "/mnt/$i" || exit
-    fio --ramp_time=5 \
-        --gtod_reduce=1 \
-        --numjobs=1 \
-        --bs=1M \
-        --size=1G \
-        --runtime=60s \
-        --readwrite=readwrite \
-        --name=testfile  > "$TEST_RESULTS_FOLDER$TEST_RESULT_FILE"
-        echo "
-###################################
-####### $(pwd) #######
-###################################" >> "$TEST_RESULTS_FOLDER/SUMMARY.txt"
-    grep -e READ -e WRITE "$TEST_RESULTS_FOLDER$TEST_RESULT_FILE" >> "$TEST_RESULTS_FOLDER/SUMMARY.txt"
-    ) &
-done
-echo "
-##############################
-########## SUMMARY ###########
-##############################"
-cat "${TEST_RESULTS_FOLDER}SUMMARY.txt"
-
-echo "Do you want to delete the test files? [y/N]"
-read -r DELETE_TEST_FILES
-if [ "$DELETE_TEST_FILES" == "y" ]; then
-    for i in "${TEST_LOCATIONS[@]}"; do
-        rm -rf "$i/testfile*"
-    done
-fi
+sudo diskutil unmountDisk $2
+(pv -n $1 | sudo dd of=$2 bs=128M conv=notrunc,noerror) 2>&1 \
+| dialog --gauge "Running dd command (cloning), please wait..." 10 70 0
