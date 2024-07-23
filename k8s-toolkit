@@ -382,7 +382,7 @@ systemctl restart kubelet
 ____EOF____
     ) &
   done
-  wait & sleep 10
+  wait
 }
 
 #######################################
