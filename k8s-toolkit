@@ -633,7 +633,7 @@ echo "-- $HOSTNAME: Uninstall Completed"
 ____EOF____
     ) &
   done
-  wait
+  wait & sleep 20
   echo "---------------------------------------------------------------" 
 }
 
