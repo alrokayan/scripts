@@ -17,13 +17,14 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./tailscale-install.sh ts_1234567890abcdef
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./tailscale-install.sh ts_1234567890abcdef 8443
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/tailscale-install.sh | bash -s -- ts_1234567890abcdef
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/tailscale-install.sh | bash -s -- ts_1234567890abcdef 8443
 # $1 Tailscale authkey
+# $2 Tailscale port to expose (optional)
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "Usage: $0 <tailscale authkey>"
-    echo "EXAMPLE: $0 ts_1234567890abcdef"
+    echo "Usage: $0 <tailscale authkey> <port - optional>" 
+    echo "EXAMPLE: $0 ts_1234567890abcdef 8443"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "This script will install tailscale"
         exit 0
@@ -43,4 +44,6 @@ tailscale up \
        --authkey="$1" \
        --accept-routes=true \
        --reset
-# tailscale funnel --bg http://127.0.0.1
+if [ -n "$2" ]; then
+    tailscale funnel --bg http://127.0.0.1:"$2"
+fi
