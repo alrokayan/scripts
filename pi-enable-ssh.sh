@@ -41,11 +41,14 @@ function ENABLE_CONFIG_SSH() {
     df -h | grep -E "$ROOT_MNT_PATH|$BOOT_MNT_PATH"
     touch "$BOOT_MNT_PATH/ssh" && echo " -- ssh enabled successfully"
     if ! [ -f "$BOOT_MNT_PATH/userconf" ]; then
-        echo "-- Please enter the password for the root user"
-        echo "root:$(openssl passwd -6)" > "$BOOT_MNT_PATH/userconf"
+        echo "-- Please enter the password for \"pi\" user"
+        echo "pi:$(openssl passwd -6)" > "$BOOT_MNT_PATH/userconf"
     fi
     echo "-- User configuration file ($BOOT_MNT_PATH/userconf) content: "
     cat "$BOOT_MNT_PATH/userconf"
+    echo "-- Enabling pi user to run sudo without password"
+    echo 'pi ALL=(ALL) NOPASSWD:ALL' >> $ROOT_MNT_PATH/etc/sudoers
+    grep "pi ALL=(ALL) NOPASSWD:ALL" $ROOT_MNT_PATH/etc/sudoers
     mkdir -p "$ROOT_MNT_PATH/root/.ssh"
     cat "$HOME/.ssh/id_rsa.pub" > $ROOT_MNT_PATH/root/.ssh/authorized_keys
     cat "$ROOT_MNT_PATH/root/.ssh/authorized_keys"
