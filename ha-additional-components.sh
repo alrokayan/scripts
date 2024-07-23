@@ -31,7 +31,6 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 cd "$1" || exit
-wget -O - https://get.hacs.xyz | bash -
 mkdir -p "$1/www/"
 curl -fsSL https://raw.githubusercontent.com/thomasloven/lovelace-fold-entity-row/master/fold-entity-row.js -o "$1/www/fold-entity-row.js"
 curl -fsSL https://raw.githubusercontent.com/thomasloven/lovelace-auto-entities/master/auto-entities.js -o "$1/www/auto-entities.js"
@@ -45,3 +44,4 @@ frontend:
 ' >> configuration.yaml
 fi
 cat configuration.yaml
+wget -O - https://get.hacs.xyz | bash -
