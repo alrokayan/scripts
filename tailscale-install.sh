@@ -37,7 +37,6 @@ sed -i '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/
 sysctl -p /etc/sysctl.conf
 # ip link delete tailscale0
 systemctl enable --now tailscaled
-systemctl status tailscaled
 tailscale up \
        --accept-dns=false \
        --advertise-exit-node=false \
@@ -47,3 +46,4 @@ tailscale up \
 if [ -n "$2" ]; then
     tailscale funnel --bg http://127.0.0.1:"$2"
 fi
+tailscale status
