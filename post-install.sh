@@ -24,7 +24,10 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "This script will install post-install"
     exit 0
 fi
-echo "$(id -un -u 1000) ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+if [ "$(id -un -u 1000)" -ne 0 ]; then
+    echo "-- Enable sudo without password for $(id -un -u 1000)"
+    echo "$(id -un -u 1000) ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+fi
 apt update -y
 apt upgrade -y
 apt autoclean -y
