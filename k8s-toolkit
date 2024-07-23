@@ -1010,16 +1010,16 @@ while $CONTINUE; do
     echo "-----------------------------------------------------------" 
     echo "-------------------------- TOOLS --------------------------" 
     echo "-----------------------------------------------------------" 
-    echo "(un3)...undo step 3 and 5 (deleting all apps and kube-network)" 
-    echo "(unD)...unDeploy all apps" 
-    echo "(b).....binaries installation locally (helm, kubectl, jq and k9s)" 
-    echo "(k).....k9s - monitor K8s cluster status" 
-    echo "(c).....copy kubeconfig file from the master node" 
-    echo "(n).....network diagnostic tool (dnstools pod deployment)" 
-    echo "(d).....dns fix" 
-    echo "(s).....swap partition removal" 
-    echo "(R).....REBOOT ALL NODES" 
-    echo "(all)...installation steps at once" 
+    echo "(unAll)..unDeploy apps and kube-network (undo step3)" 
+    echo "(unApps).unDeploy apps" 
+    echo "(b)......binaries installation locally (helm, kubectl, jq and k9s)" 
+    echo "(k)......k9s - monitor K8s cluster status" 
+    echo "(c)......copy kubeconfig file from the master node" 
+    echo "(n)......network diagnostic tool (dnstools pod deployment)" 
+    echo "(d)......dns fix" 
+    echo "(s)......swap partition removal" 
+    echo "(R)......REBOOT ALL NODES" 
+    echo "(all)....installation steps at once" 
     echo "-----------------------------------------------------------" 
     read -r OPTION
   else
@@ -1073,14 +1073,14 @@ while $CONTINUE; do
     RESTART_ALL_NODES "${NODE_ARRAY[@]}" "$PRIVATE_KEY"
     END_OF_SCRIPT
     ;;
-  un5) ## Undeploy deployment
+  unApps) ## Undeploy deployment
     echo "-- Un-deploying all apps" 
-    unDeployAll
+    unDeployApps
     END_OF_SCRIPT
     ;;
-  unD) ## Undeploy deployment
+  unNetwork) ## Undeploy deployment
     echo "-- Un-deploying all apps including kube-network namespace" 
-    unDeployApps
+    unDeployAll
     END_OF_SCRIPT
     ;;
   0)
