@@ -24,6 +24,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "This script will install post-install"
     exit 0
 fi
+echo "$(id -un -u 1000) ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 apt update -y
 apt upgrade -y
 apt autoclean -y
