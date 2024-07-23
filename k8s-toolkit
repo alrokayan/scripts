@@ -238,7 +238,7 @@ fi
 ____EOF____
     ) &
   done
-  wait & sleep 10
+  wait
   WAIT_ALL_NODES_ONLINE "${NODE_ARRAY[@]}"
 }
 
@@ -635,7 +635,7 @@ echo "-- $HOSTNAME: Uninstall Completed"
 ____EOF____
     ) &
   done
-  wait & sleep 10
+  wait
   echo "---------------------------------------------------------------" 
 }
 
@@ -660,7 +660,7 @@ ff02::2 ip6-allrouters' >>tmp/hosts
       scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/hosts "$SSH_USERNAME"@"$IP":/etc/
     ) &
   done
-  wait & sleep 10
+  wait
 
   echo "-- Updating, upgrading and installing pre-requisites on all nodes, please wait ..." 
   for IP in "${NODE_ARRAY[@]}"; do
@@ -745,7 +745,7 @@ apt install -y containerd
 ____EOF____
     ) &
   done
-  wait & sleep 10
+  wait
 
   if [ "$K8S_VERSION" == "" ]; then
     for IP in "${NODE_ARRAY[@]}"; do
@@ -772,7 +772,7 @@ kubeadm config images pull --kubernetes-version $(echo "$K8S_VERSION" | sed 's/-
 ____EOF____
     ) &
   done
-  wait & sleep 10
+  wait
   echo "---------------------------------------------------------------" 
 }
 
@@ -826,7 +826,7 @@ ____EOF____
   for IP in "${NODE_ARRAY[@]}"; do
     (scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$KUBECONFIG" "$SSH_USERNAME"@"$IP":~/.kube/config) &
   done
-  wait & sleep 10
+  wait
   echo "-- Copying join command file to this machine" 
   IS_MASTER=true
   for IP in "${NODE_ARRAY[@]}"; do
@@ -849,7 +849,7 @@ ____EOF____
       ) &
     fi
   done
-  wait & sleep 10  
+  wait  
   echo "---------------------------------------------------------------" 
 }
 
@@ -895,7 +895,7 @@ chown -R "$(id -un)":"$(id -gn)" /opt/cni
 ____EOF____
       i=$((i + 1))
     done
-    wait & sleep 10
+    wait
     if [ "$L2_SWITCH" == "y" ]; then
       FLANNEL_BACKEND="host-gw"
     else
@@ -917,7 +917,7 @@ ____EOF____
     curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/reference-deployment/master/multus-dhcp/dhcp-daemonset.yml -o tmp/dhcp-daemonset.yml
     sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
     kubectl apply -n kube-network -f tmp/dhcp-daemonset.yml
-    wait & sleep 10
+    wait
     sleep 5
     echo "-- Restarting CoreDNS" 
     kubectl delete pod --selector=k8s-app=kube-dns -n kube-system --grace-period=0 --force
