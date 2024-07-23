@@ -42,21 +42,3 @@ else
 fi
 echo "-- Unmounting disk $2"
 sudo diskutil unmountDisk "$2"
-
-
-
-mkdir -p tmp
-curl -OJL "$1"
-if [ "${1##*.}" != "img" ]; then
-    DIR="$(dirname "${1}")"
-    FILE="$(basename "${1}")"
-    FILE_IMG="${FILE%.*}"
-    IMAGE_FILE="$DIR/$FILE_IMG"
-    echo "Extracting $DIR/$FILE_IMG, please wait..."
-    gunzip -vf "$1"
-else
-    IMAGE_FILE="$1"
-fi
-sudo diskutil unmountDisk "$2"
-sudo dd if=tmp/image.img.xz of="$2" bs=4M conv=notrunc,noerror status=progress
-sudo diskutil unmountDisk "$2"
