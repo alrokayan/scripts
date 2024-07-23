@@ -574,21 +574,20 @@ if command -v kubeadm &> /dev/null; then
 fi
 
 echo "-- $HOSTNAME: Uninstalling k8s (kubelet, kubeadm, and containerd)"
+systemctl stop $(systemctl -l | grep kube) 
+systemctl disable $(systemctl -l | grep kube) 
 apt-mark unhold kubelet kubeadm kubectl docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 
 for pkg in kubectl kubeadm kubelet docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc containerd; do
     apt purge -y --allow-change-held-packages $pkg 
 done
-systemctl stop $(systemctl -l | grep kube) 
-systemctl disable $(systemctl -l | grep kube) 
 
 echo "-- $HOSTNAME: Removing gpg and source lists of kubernetes and adoptium"
 rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
 rm -f /etc/apt/trusted.gpg.d/adoptium.gpg
 rm -f /etc/apt/sources.list.d/kubernetes.list
 rm -f /etc/apt/sources.list.d/adoptium.list
-apt update -y 
+apt update -y
 
-systemctl daemon-reload 
 echo "-- $HOSTNAME: Unmounting and deleting containerd, kubelet, cni, etcd and other kubernetes files and folders"
 umount -f /var/run/containerd/*/*/*/* 
 umount -f /var/lib/kubelet/*/*/*/*/* 
