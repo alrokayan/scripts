@@ -1078,7 +1078,7 @@ while $CONTINUE; do
     unDeployApps
     END_OF_SCRIPT
     ;;
-  unNetwork) ## Undeploy deployment
+  unAll) ## Undeploy deployment
     echo "-- Un-deploying all apps including kube-network namespace" 
     unDeployAll
     END_OF_SCRIPT
