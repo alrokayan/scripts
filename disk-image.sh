@@ -33,3 +33,4 @@ if [ -z "$1" ] && [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 sudo diskutil unmountDisk "$2"
 sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
+sudo diskutil unmountDisk "$2"
