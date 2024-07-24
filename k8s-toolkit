@@ -580,9 +580,9 @@ fi
 echo "-- $HOSTNAME: Uninstalling k8s (kubelet, kubeadm, and containerd)"
 systemctl stop $(systemctl -l | grep kube) &> /dev/null;
 systemctl disable $(systemctl -l | grep kube) &> /dev/null;
-apt-mark unhold kubelet kubeadm kubectl containerd docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &> /dev/null;
+DEBIAN_FRONTEND="noninteractive" apt-mark unhold kubelet kubeadm kubectl containerd docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin &> /dev/null;
 for pkg in kubectl kubeadm kubelet docker-ce docker-ce-cli docker.io containerd.io docker-doc docker-build-plugin docker-compose-plugin docker-compose docker-compose-v2 podman-docker containerd runc containerd; do
-    apt purge -y --allow-change-held-packages $pkg 
+    DEBIAN_FRONTEND="noninteractive" apt purge -y --allow-change-held-packages $pkg 
 done
 echo "-- $HOSTNAME: Removing gpg and source lists of kubernetes and adoptium"
 rm -f /etc/apt/keyrings/kubernetes-apt-keyring.gpg
@@ -590,10 +590,10 @@ rm -f /etc/apt/trusted.gpg.d/adoptium.gpg
 rm -f /etc/apt/sources.list.d/kubernetes.list
 rm -f /etc/apt/sources.list.d/adoptium.list
 echo "-- $HOSTNAME: apt update autoremove autoclean"
-apt update -y
-apt autoremove -y --purge
-apt autoclean -y
-apt clean -y
+DEBIAN_FRONTEND="noninteractive" apt update -y
+DEBIAN_FRONTEND="noninteractive" apt autoremove -y --purge
+DEBIAN_FRONTEND="noninteractive" apt autoclean -y
+DEBIAN_FRONTEND="noninteractive" apt clean -y
 echo "-- $HOSTNAME: deleting leftover NICs"
 for nic in $(ip link show | grep -e ": lxc" -e ": cali" -e ": cilium" -e ": flannel" -e ": tunl" -e ": cni" -e ": cbr" | awk -F@ '{print $1}' | awk '{print $2}'); do
   ip link set $nic down
@@ -684,9 +684,9 @@ for cmd in iptables ip6tables iptables-legacy ip6tables-legacy; do
 done
 update-alternatives --remove iptables /usr/sbin/iptables-legacy
 echo "-- $HOSTNAME: Updating, upgrading and installing pre-requisites, please wait ..."
-apt update -y 
-apt upgrade -y 
-apt install -y \
+DEBIAN_FRONTEND="noninteractive" apt update -y 
+DEBIAN_FRONTEND="noninteractive" apt upgrade -y 
+DEBIAN_FRONTEND="noninteractive" apt install -y \
     apt-transport-https \
     ca-certificates \
     nfs-common \
@@ -722,23 +722,23 @@ sed -i '/.*#DNSStubListener=.*/ c\DNSStubListener=no' /etc/systemd/resolved.conf
 update-grub 
 sysctl --system 
 echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections
-apt-get install -y -q
+DEBIAN_FRONTEND="noninteractive" apt install -y -q
 echo "-- $HOSTNAME: Installing gpg for jave (adoptium) and kubernetes"
 mkdir -p -m 755 /etc/apt/keyrings
 mkdir -p /etc/apt/sources.list.d/
 mkdir -p /etc/apt/trusted.gpg.d/
-apt update -y 
+DEBIAN_FRONTEND="noninteractive" apt update -y 
 # kubernetes
 curl --silent -fsSL https://pkgs.k8s.io/core:/stable:/v1.29/deb/Release.key | gpg --batch --yes --dearmor -o /etc/apt/keyrings/kubernetes-apt-keyring.gpg 
 echo 'deb [signed-by=/etc/apt/keyrings/kubernetes-apt-keyring.gpg] https://pkgs.k8s.io/core:/stable:/v1.29/deb/ /' > /etc/apt/sources.list.d/kubernetes.list 
 # adoptium
 curl --silent -fsSL https://packages.adoptium.net/artifactory/api/gpg/key/public | gpg --batch --yes --dearmor -o /etc/apt/trusted.gpg.d/adoptium.gpg
 echo "deb https://packages.adoptium.net/artifactory/deb $(awk -F= '/^VERSION_CODENAME/{print$2}' /etc/os-release) main" > /etc/apt/sources.list.d/adoptium.list
-apt update -y 
+DEBIAN_FRONTEND="noninteractive" apt update -y 
 echo "-- $HOSTNAME: Installing Jave"
-apt install -y temurin-21-jre 
+DEBIAN_FRONTEND="noninteractive" apt install -y temurin-21-jre 
 echo "-- $HOSTNAME: Installing containerd"
-apt install -y containerd
+DEBIAN_FRONTEND="noninteractive" apt install -y containerd
 ____EOF____
     ) &
   done
@@ -756,8 +756,8 @@ ____EOF____
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" K8S_VERSION="$K8S_VERSION" "bash -s" <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: Installing kubernetes (version: $K8S_VERSION)"
-apt install -y --allow-change-held-packages kubelet=$K8S_VERSION kubeadm=$K8S_VERSION kubectl=$K8S_VERSION 
-apt-mark hold kubelet kubeadm kubectl containerd  
+DEBIAN_FRONTEND="noninteractive" apt install -y --allow-change-held-packages kubelet=$K8S_VERSION kubeadm=$K8S_VERSION kubectl=$K8S_VERSION 
+DEBIAN_FRONTEND="noninteractive" apt-mark hold kubelet kubeadm kubectl containerd  
 containerd config default > /etc/containerd/config.toml
 sed -i 's/ SystemdCgroup = false/ SystemdCgroup = true/' /etc/containerd/config.toml
 systemctl daemon-reload 
@@ -869,8 +869,8 @@ function step3() {
           kubectl taint nodes "$MASTER_HOSTNAME" node-role.kubernetes.io/control-plane:NoSchedule-
         fi
       fi
-      echo "-- $NODE_HOSTNAME: Labeling host=$NODE_HOSTNAME"
-      kubectl label nodes "$NODE_HOSTNAME" host="$NODE_HOSTNAME"
+      echo "-- $NODE_HOSTNAME: Tainting host=$NODE_HOSTNAME"
+      kubectl taint nodes "$NODE_HOSTNAME" host="$NODE_HOSTNAME"
       echo "-- $NODE_HOSTNAME: Create subnet.env and download cni binaries"
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" i="$i" bash <<'____EOF____'
 #!/bin/bash
