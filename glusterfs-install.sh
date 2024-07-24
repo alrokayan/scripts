@@ -35,7 +35,7 @@ fi
 apt install xfsprogs glusterfs-server glusterfs-client -y
 systemctl enable glusterd
 systemctl start glusterd
-systemctl status glusterd
+systemctl status glusterd -l --no-pager
 gluster peer probe "$2"
 gluster peer probe "$3"
 gluster peer status

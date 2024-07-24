@@ -33,11 +33,11 @@ fi
 DISK=$1
 systemctl stop iptables
 systemctl disable iptables
-systemctl status iptables
+systemctl status iptables -l --no-pager
 apt install xfsprogs glusterfs-server glusterfs-client -y
 systemctl enable glusterd
 systemctl start glusterd
-systemctl status glusterd
+systemctl status glusterd -l --no-pager
 mkfs.xfs "$DISK" -f
 wipefs -a "$DISK"
 mkfs.xfs "$DISK" -f

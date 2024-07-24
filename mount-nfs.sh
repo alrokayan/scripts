@@ -57,4 +57,5 @@ EOF
 systemctl daemon-reload
 systemctl enable "$SYSTEMD_ESCAPED_MOUNT_POINT.mount"
 systemctl start "$SYSTEMD_ESCAPED_MOUNT_POINT.mount"
-systemctl status "$SYSTEMD_ESCAPED_MOUNT_POINT.mount"
+systemctl status "$SYSTEMD_ESCAPED_MOUNT_POINT.mount" -l --no-pager
+ls -al "$3"
