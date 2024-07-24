@@ -224,8 +224,7 @@ EOF
 function SWAPRemoval() {
   echo "-- Removing SWAP and rebooting if needed on all nodes" 
   for IP in "${NODE_ARRAY[@]}"; do
-    (
-      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
+    ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
 #!/bin/bash
 if free | awk '/^Swap:/ {exit !$2}'; then
   echo "-- NODE $i -- removing swap partition "
@@ -236,9 +235,7 @@ if free | awk '/^Swap:/ {exit !$2}'; then
   reboot
 fi
 ____EOF____
-    ) &
   done
-  wait
   WAIT_ALL_NODES_ONLINE "${NODE_ARRAY[@]}"
 }
 
@@ -650,13 +647,12 @@ ff00::0 ip6-mcastprefix
 ff02::1 ip6-allnodes
 ff02::2 ip6-allrouters' >>tmp/hosts
   for IP in "${NODE_ARRAY[@]}"; do
-      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" "mv /etc/hosts /etc/hosts.BACKUP"
-      scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/hosts "$SSH_USERNAME"@"$IP":/etc/
+    ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" "mv /etc/hosts /etc/hosts.BACKUP"
+    scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/hosts "$SSH_USERNAME"@"$IP":/etc/
   done
   echo "-- Updating, upgrading and installing pre-requisites on all nodes, please wait ..." 
   for IP in "${NODE_ARRAY[@]}"; do
-    (
-      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
+    ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "bash -s" <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: Creating folders and setting permissions"
 mkdir -p ~/.kube
@@ -723,9 +719,7 @@ DEBIAN_FRONTEND="noninteractive" apt install -y temurin-21-jre
 echo "-- $HOSTNAME: Installing containerd"
 DEBIAN_FRONTEND="noninteractive" apt install -y containerd
 ____EOF____
-    ) &
   done
-  wait
   if [ "$K8S_VERSION" == "" ]; then
     for IP in "${NODE_ARRAY[@]}"; do
       DEFAULT_VERSION=$(ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" "apt-cache policy kubeadm | grep Candidate | awk '{print \$2}'")
@@ -797,9 +791,8 @@ ____EOF____
   copyKubeconfig
   echo "-- Copying kubeconfig to all nodes" 
   for IP in "${NODE_ARRAY[@]}"; do
-    (scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$KUBECONFIG" "$SSH_USERNAME"@"$IP":~/.kube/config) &
+    scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$KUBECONFIG" "$SSH_USERNAME"@"$IP":~/.kube/config
   done
-  wait
   echo "-- Copying join command file to this machine" 
   IS_MASTER=true
   for IP in "${NODE_ARRAY[@]}"; do
@@ -811,18 +804,15 @@ ____EOF____
     else
       echo "-- $IP joining the cluster" 
       scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/join.sh "$SSH_USERNAME"@"$IP":~/.kube/join.sh
-      (
-        ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" i="$i" "bash -s" <<'____EOF____'
+      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" i="$i" "bash -s" <<'____EOF____'
 #!/bin/bash
 chmod +x $HOME/.kube/join.sh
 echo "-- $HOSTNAME: Joining k8s cluster"
 $HOME/.kube/join.sh
 echo "-- $HOSTNAME: Completed"
 ____EOF____
-      ) &
     fi
   done
-  wait  
   echo "---------------------------------------------------------------" 
 }
 
