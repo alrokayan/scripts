@@ -842,8 +842,8 @@ function step3() {
           kubectl taint nodes "$MASTER_HOSTNAME" node-role.kubernetes.io/control-plane:NoSchedule-
         fi
       fi
-      echo "-- $NODE_HOSTNAME: Tainting host=$NODE_HOSTNAME"
-      kubectl taint nodes "$NODE_HOSTNAME" host="$NODE_HOSTNAME"
+      echo "-- $NODE_HOSTNAME: Labeling host=$NODE_HOSTNAME"
+      kubectl label nodes "$NODE_HOSTNAME" "host=$NODE_HOSTNAME"
       echo "-- $NODE_HOSTNAME: Create subnet.env and download cni binaries"
       ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" i="$i" bash <<'____EOF____'
 #!/bin/bash
