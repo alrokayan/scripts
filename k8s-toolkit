@@ -685,27 +685,10 @@ done
 update-alternatives --remove iptables /usr/sbin/iptables-legacy
 echo "-- $HOSTNAME: Updating, upgrading and installing pre-requisites, please wait ..."
 DEBIAN_FRONTEND="noninteractive" apt update -y 
-DEBIAN_FRONTEND="noninteractive" apt upgrade -y 
-DEBIAN_FRONTEND="noninteractive" apt install -y \
-    apt-transport-https \
-    ca-certificates \
-    nfs-common \
-    curl \
-    gpg \
-    sudo \
-    wget \
-    dirmngr \
-    gnupg \
-    software-properties-common \
-    ipvsadm \
-    util-linux \
-    coreutils \
-    git \
-    rclone \
-    nano \
-    jq \
-    cifs-utils \
-    openvswitch-switch 
+DEBIAN_FRONTEND="noninteractive" apt upgrade -y
+for pkg in apt-transport-https ca-certificates nfs-common curl gpg sudo wget dirmngr gnupg software-properties-common ipvsadm util-linux coreutils git rclone nano jq cifs-utils openvswitch-switch; do
+    DEBIAN_FRONTEND="noninteractive" apt install -y --allow-change-held-packages $pkg
+done
 echo "-- $HOSTNAME: Enabling kernel modules, ip forwarding and disabling DNSStubListener"
 echo 'overlay
 br_netfilter' > /etc/modules-load.d/kubernetes.conf
