@@ -549,10 +549,10 @@ function END_OF_SCRIPT() {
 
 #######################################
 #######################################
-###### FUNCTION step0 1 2 3 4 5 #######
+###### FUNCTION step 1 2 3 ############
 #######################################
 #######################################
-function step0() {
+function step1() {
   binInstall false
   copyKubeconfig
   SWAPRemoval
@@ -636,7 +636,7 @@ ____EOF____
 
 ##################################################################################
 ##################################################################################
-function step1() {
+function step2() {
   echo "-- Creating and copying hosts file" 
   echo "127.0.0.1 localhost" >tmp/hosts
   for IP in "${NODE_ARRAY[@]}"; do
@@ -769,12 +769,6 @@ ____EOF____
     ) &
   done
   wait
-  echo "---------------------------------------------------------------" 
-}
-
-##################################################################################
-##################################################################################
-function step2() {
   echo "-- Initializing kubernetes version: ${K8S_VERSION//-[0-9].*/}"
   for IP in "${NODE_ARRAY[@]}"; do
     ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" MASTER_IP="$IP" K8S_VERSION="$K8S_VERSION" SSH_USERNAME="$SSH_USERNAME" "bash -s" <<'____EOF____'
@@ -1000,19 +994,18 @@ while $CONTINUE; do
     echo "-----------------------------------------------------------" 
     echo "Welcome to K8S TOOLKIT .." 
     echo "-----------------------------------------------------------" 
-    echo "(q)    < Quit (and remove tmp and logs folders)" 
+    echo "(q)     < Quit (and remove tmp and logs folders)" 
     echo "-----------------------------------------------------------" 
     echo "------------------- INSTALLATION STEPS --------------------" 
     echo "-----------------------------------------------------------" 
-    echo "[0].....Uninstall Everything" 
-    echo "[1].....Prepare hosts and install pre-requisites (apt install)" 
-    echo "[2].....Create kubernetes cluster (kubeadm init)" 
-    echo "[3].....Deploy kubernetes network (flannel and multus)" 
+    echo "[1]......Uninstall Everything" 
+    echo "[2]......Install kubernetes" 
+    echo "[3]......Deploy kubernetes network (flannel and multus)" 
     echo "-----------------------------------------------------------" 
     echo "-------------------------- TOOLS --------------------------" 
     echo "-----------------------------------------------------------" 
-    echo "(unAll)..unDeploy apps and kube-network (undo step3)" 
-    echo "(unApps).unDeploy apps" 
+    echo "(unAll)..unDeploy all apps and kube-network (undo step3)" 
+    echo "(unApps).unDeploy only the apps" 
     echo "(b)......binaries installation locally (helm, kubectl, jq and k9s)" 
     echo "(k)......k9s - monitor K8s cluster status" 
     echo "(c)......copy kubeconfig file from the master node" 
@@ -1020,7 +1013,7 @@ while $CONTINUE; do
     echo "(d)......dns fix" 
     echo "(s)......swap partition removal" 
     echo "(R)......REBOOT ALL NODES" 
-    echo "(all)....installation steps at once" 
+    echo "(all)....all installation steps at once" 
     echo "-----------------------------------------------------------" 
     read -r OPTION
   else
@@ -1050,7 +1043,7 @@ while $CONTINUE; do
     ;;
   b)
     echo "-- Installing binaries" 
-    binInstall
+    binInstall true
     END_OF_SCRIPT
     ;;
   d)
@@ -1084,19 +1077,14 @@ while $CONTINUE; do
     unDeployAll
     END_OF_SCRIPT
     ;;
-  0)
-    step0
-    echo "-- Step 0 (apt uninstall) completed" 
-    END_OF_SCRIPT
-    ;;
   1)
     step1
-    echo "-- Step 1 (apt install) completed" 
+    echo "-- Step 1 (uninstall) completed" 
     END_OF_SCRIPT
     ;;
   2)
     step2
-    echo "-- Step 2 (cluster creation) completed" 
+    echo "-- Step 2 (install) completed" 
     END_OF_SCRIPT
     ;;
   3)
@@ -1105,12 +1093,10 @@ while $CONTINUE; do
     END_OF_SCRIPT
     ;;
   all)
-    step0
-    echo "-- Step 0 (apt uninstall) completed" 
     step1
-    echo "-- Step 1 (apt install) completed" 
+    echo "-- Step 1 (uninstall) completed" 
     step2
-    echo "-- Step 2 (cluster creation) completed" 
+    echo "-- Step 2 (install) completed" 
     step3
     echo "-- Step 3 (network deployment) completed" 
     echo "-- Running k9s"
