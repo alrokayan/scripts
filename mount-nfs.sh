@@ -33,7 +33,7 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--h
     exit 1
 fi
 SYSTEMD_ESCAPED_MOUNT_POINT=$(systemd-escape --path "$3")
-echo "-- Mounting: $1:$2 on $3 ($SYSTEMD_ESCAPED_MOUNT_POINT)" >&3
+echo "-- Mounting: $1:$2 on $3 ($SYSTEMD_ESCAPED_MOUNT_POINT)"
 mkdir -p "$3"
 cat >"/etc/systemd/system/$SYSTEMD_ESCAPED_MOUNT_POINT.mount" <<EOF
 [Unit]

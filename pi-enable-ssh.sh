@@ -35,11 +35,12 @@ function ENABLE_CONFIG_SSH() {
     echo "-- ROOT_MNT_PATH: $ROOT_MNT_PATH"
     echo "-- BOOT_MNT_PATH: $BOOT_MNT_PATH"
     if ! df | grep -q "$ROOT_MNT_PATH" || ! df | grep -q "$BOOT_MNT_PATH" ; then
-        echo " -- Disk is not mounted. Try to unplug and re-plug the disk"
+        echo "-- Disk is not mounted. Try to unplug and re-plug the disk"
+        echo "-- For mac, you must download and install extFS for mac from https://www.paragon-software.com/us/home/extfs-mac/"
         exit 1
     fi
     df -h | grep -E "$ROOT_MNT_PATH|$BOOT_MNT_PATH"
-    touch "$BOOT_MNT_PATH/ssh" && echo " -- ssh enabled successfully"
+    touch "$BOOT_MNT_PATH/ssh" && ls -al "$BOOT_MNT_PATH/ssh" && echo " -- ssh enabled successfully"
     if ! [ -f "$BOOT_MNT_PATH/userconf" ]; then
         echo "-- Please enter the password for \"pi\" user"
         echo "pi:$(openssl passwd -6)" > "$BOOT_MNT_PATH/userconf"
@@ -47,7 +48,7 @@ function ENABLE_CONFIG_SSH() {
     echo "-- User configuration file ($BOOT_MNT_PATH/userconf) content: "
     cat "$BOOT_MNT_PATH/userconf"
     echo "-- Enabling pi user to run sudo without password"
-    echo 'pi ALL=(ALL) NOPASSWD:ALL' >> $ROOT_MNT_PATH/etc/sudoers
+    echo 'pi ALL=(ALL) NOPASSWD:ALL' | sudo tee -a $ROOT_MNT_PATH/etc/sudoers > /dev/null
     grep "pi ALL=(ALL) NOPASSWD:ALL" $ROOT_MNT_PATH/etc/sudoers
     mkdir -p "$ROOT_MNT_PATH/root/.ssh"
     cat "$HOME/.ssh/id_rsa.pub" > $ROOT_MNT_PATH/root/.ssh/authorized_keys
