@@ -31,6 +31,7 @@ if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
   fi
   exit 1
 fi
+# https://www.fsarchiver.org/quickstart/
 apt install fsarchiver -y
-fsarchiver savefs "$2" "${1}1" "${1}2"
+fsarchiver savefs "$2" "${1}1" "${1}2" -v -j4 -A
 fsarchiver archinfo "$2"
