@@ -26,16 +26,16 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <tailscale authkey> <port - optional>" 
     echo "EXAMPLE: $0 ts_1234567890abcdef 8443"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo "This script will install tailscale"
+        echo "This script will install tailscale on bookwarm raspbian"
         exit 0
     fi
     exit 1
 fi
 apt-get install apt-transport-https
-curl -fsSL https://pkgs.tailscale.com/stable/raspbian/bullseye.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg > /dev/null
-curl -fsSL https://pkgs.tailscale.com/stable/raspbian/bullseye.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
-apt-get update
-apt-get install tailscale
+mkdir -p --mode=0755 /usr/share/keyrings
+curl -fsSL https://pkgs.tailscale.com/stable/raspbian/bookworm.noarmor.gpg | sudo tee /usr/share/keyrings/tailscale-archive-keyring.gpg >/dev/null
+curl -fsSL https://pkgs.tailscale.com/stable/raspbian/bookworm.tailscale-keyring.list | sudo tee /etc/apt/sources.list.d/tailscale.list
+apt-get update && apt-get install tailscale
 # ip link delete tailscale0
 systemctl enable --now tailscaled
 tailscale up \
