@@ -44,6 +44,6 @@ tailscale up \
        --accept-routes=true \
        --reset
 if [ -n "$2" ]; then
-    tailscale funnel --bg http://127.0.0.1:"$2"
+    tailscale funnel --bg "http://127.0.0.1:$2"
 fi
 tailscale status

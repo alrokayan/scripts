@@ -31,14 +31,6 @@ if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
-if ! command -v fsarchiver &> /dev/null; then
-  echo "-- Installing fsarchiver"
-  mkdir -p tmp/fsarchiver
-  curl -L https://github.com/fdupoux/fsarchiver/releases/download/0.8.7/fsarchiver-0.8.7.tar.gz -o tmp/fsarchiver.tar.gz
-  tar -zxf /path/to/fsarchiver-x.y.z.tar.gz -C tmp/fsarchiver
-  sudo rm -f /usr/local/bin/fsarchiver
-  sudo mv tmp/fsarchiver/fsarchiver /usr/local/bin/
-  sudo chmod +x /usr/local/fsarchiver
-fi
+apt install fsarchiver -y
 fsarchiver archinfo "$1"
-fsarchiver restfs "$1" "id=0,dest=$2"
+fsarchiver restfs "$1" "id=0,dest=${2}1" "id=1,dest=${2}2"
