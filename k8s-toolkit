@@ -505,6 +505,7 @@ for nic in $(ip link show | grep -e ": cni" -e ": flannel" | awk -F@ '{print $1}
 done
 echo "-- $HOSTNAME: Force stopping cni demon"
 kill -9 $(ps aux | grep -v "grep" | grep -e "/opt/cni/bin" | awk '{print $2}')
+sleep 1
 echo "-- $HOSTNAME: Deleting cni files"
 rm -rf /run/flannel
 rm -rf /opt/cni
