@@ -433,6 +433,10 @@ resolvConf: /etc/resolv.conf" > '/var/lib/kubelet/kubeletconfigurationpatches/ku
 fi
 echo "-- $HOSTNAME: Upgrading kubelet configuration"
 kubeadm upgrade node phase kubelet-config --patches /var/lib/kubelet/kubeletconfigurationpatches/
+echo "-- $HOSTNAME: Recreating kubeadm-config ConfigMap with new configurations"
+kubectl delete configmap -n kube-system kubeadm-config
+kubectl create configmap -n kube-system kubeadm-config --from-file=/var/lib/kubelet/config.yaml
+systemctl daemon-reload && systemctl restart kubelet
 ____EOF____
     break
   done
@@ -557,6 +561,9 @@ function step1() {
     response="$(curl -w '%{http_code}' -o /dev/null -ILks "https://$IP:6443")"
     break
   done
+  echo "-- $HOSTNAME: Resetting iptables"
+  iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+  ipvsadm -C
   if [[ "$response" != *"000"* ]]; then
     unDeployAll
     for i in $(kubectl get nodes -o name | cut -c 6-); do
@@ -665,20 +672,6 @@ chown -R "$(id -un)":"$(id -gn)" /etc/cni
 chown -R "$(id -un)":"$(id -gn)" /etc/containerd
 chown -R "$(id -un)":"$(id -gn)" /run/cni
 chmod -R +r /opt/cni/bin
-echo "-- $HOSTNAME: Disabling iptables"
-for cmd in iptables ip6tables iptables-legacy ip6tables-legacy; do
-  $cmd-save > /tmp/$cmd-save.txt 
-  $cmd -P INPUT ACCEPT 
-  $cmd -P FORWARD ACCEPT 
-  $cmd -P OUTPUT ACCEPT 
-  $cmd -t nat -F 
-  $cmd -t nat -X 
-  $cmd -t mangle -F 
-  $cmd -t mangle -X 
-  $cmd -F 
-  $cmd -X 
-done
-update-alternatives --remove iptables /usr/sbin/iptables-legacy
 echo "-- $HOSTNAME: Updating, upgrading and installing pre-requisites, please wait ..."
 DEBIAN_FRONTEND="noninteractive" apt update -y 
 DEBIAN_FRONTEND="noninteractive" apt upgrade -y

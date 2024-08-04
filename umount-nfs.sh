@@ -31,9 +31,9 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 SYSTEMD_ESCAPED_MOUNT_POINT=$(systemd-escape --path "$1")
-echo "-- UNmounting: $1 ($SYSTEMD_ESCAPED_MOUNT_POINT)"
+echo "-- Unmounting: $1 ($SYSTEMD_ESCAPED_MOUNT_POINT)"
 systemctl stop "$SYSTEMD_ESCAPED_MOUNT_POINT.mount"
 systemctl disable "$SYSTEMD_ESCAPED_MOUNT_POINT.mount"
 systemctl daemon-reload
-rm -f /etc/systemd/system/$SYSTEMD_ESCAPED_MOUNT_POINT.mount
+rm -f "/etc/systemd/system/$SYSTEMD_ESCAPED_MOUNT_POINT.mount"
 df -h | grep "$1"
