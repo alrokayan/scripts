@@ -432,11 +432,13 @@ resolvConf: /etc/resolv.conf" > '/var/lib/kubelet/kubeletconfigurationpatches/ku
   fi
 fi
 echo "-- $HOSTNAME: Upgrading kubelet configuration"
-kubeadm upgrade node phase kubelet-config --patches /var/lib/kubelet/kubeletconfigurationpatches/
-echo "-- $HOSTNAME: Recreating kubeadm-config ConfigMap with new configurations"
-kubectl delete configmap -n kube-system kubeadm-config
-kubectl create configmap -n kube-system kubeadm-config --from-file=/var/lib/kubelet/config.yaml
-systemctl daemon-reload && systemctl restart kubelet
+if kubeadm upgrade node phase kubelet-config --patches /var/lib/kubelet/kubeletconfigurationpatches/; then
+  echo "-- $HOSTNAME: Recreating kubelet-config ConfigMap with new configurations"
+  cp /var/lib/kubelet/config.yaml /tmp/kubelet
+  kubectl delete configmap -n kube-system kubelet-config
+  kubectl create configmap -n kube-system kubelet-config --from-file=/tmp/kubelet
+  systemctl daemon-reload && systemctl restart kubelet
+fi
 ____EOF____
     break
   done
