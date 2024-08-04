@@ -54,3 +54,4 @@ else
 fi
 cat /etc/fstab
 mount -a
+df -h | grep "$3"
