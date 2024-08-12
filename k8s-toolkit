@@ -437,7 +437,7 @@ if kubeadm upgrade node phase kubelet-config --patches /var/lib/kubelet/kubeletc
   cp /var/lib/kubelet/config.yaml /tmp/kubelet
   kubectl delete configmap -n kube-system kubelet-config
   kubectl create configmap -n kube-system kubelet-config --from-file=/tmp/kubelet
-  systemctl daemon-reload && systemctl restart kubelet
+  systemctl daemon-reload && systemctl restart kubelet && systemctl restart containerd
 fi
 ____EOF____
     break
