@@ -78,6 +78,7 @@ grep -rnw . -e "$SERVER2_IP"
 grep -rnw . -e "$SERVER3_IP"
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
+gluster volume start gfs
 gluster peer status
 gluster volume heal gfs full
 gluster volume heal gfs info
