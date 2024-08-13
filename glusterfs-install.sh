@@ -85,6 +85,4 @@ gluster volume heal gfs info
 gluster volume quota gfs enable
 gluster volume status
 gluster volume info
-gluster volume status
-gluster volume info
 
