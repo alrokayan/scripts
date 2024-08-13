@@ -48,8 +48,7 @@ if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; t
     echo "/etc/hosts does not contain the following IPs: $SERVER1_IP $SERVER2_IP $SERVER3_IP"
     exit 1
 fi
-apt install xfsprogs glusterfs-server glusterfs-client -y
-systemctl enable --now glusterd
+gluster peer probe "$SERVER1_IP"
 gluster peer probe "$SERVER2_IP"
 gluster peer probe "$SERVER3_IP"
 gluster peer status
@@ -76,9 +75,11 @@ find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
 grep -rnw . -e "$SERVER1_IP"
 grep -rnw . -e "$SERVER2_IP"
 grep -rnw . -e "$SERVER3_IP"
+grep -rnw . -e "$SERVER1_NAME"
+grep -rnw . -e "$SERVER2_NAME"
+grep -rnw . -e "$SERVER3_NAME"
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
-gluster volume start gfs
 gluster peer status
 gluster volume heal gfs full
 gluster volume heal gfs info

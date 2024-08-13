@@ -31,14 +31,14 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 DISK=$1
-apt install xfsprogs glusterfs-server glusterfs-client -y
-systemctl enable --now glusterd
-systemctl status glusterd -l --no-pager
 umount "$DISK" -f
 sh -c "echo 'w' | fdisk $DISK -w always -W always"
 wipefs -a "$DISK"
 mkfs.xfs "$DISK" -f
 mkdir /mnt/gfs_disk
+apt install xfsprogs glusterfs-server glusterfs-client -y
+systemctl enable --now glusterd
+systemctl status glusterd -l --no-pager
 echo "$DISK /mnt/gfs_disk xfs defaults 1 2" >> /etc/fstab
 systemctl daemon-reload
 mount -a
