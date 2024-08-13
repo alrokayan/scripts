@@ -23,6 +23,7 @@
 # $1 Server1 IP
 # $2 Server2 IP
 # $3 Server3 IP
+echo "yyy"
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP>"
     echo "EXAMPLE: $0 192.168.0.2 192.168.0.3 192.168.0.4"
