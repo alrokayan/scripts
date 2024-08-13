@@ -25,6 +25,7 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 apt install -y glusterfs-client
+umount /gfs -f
 rm -rf /gfs
 mkdir /gfs
 echo "localhost:gfs /gfs glusterfs defaults,_netdev 0 0" >> /etc/fstab
