@@ -17,53 +17,44 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-test.sh /mnt /root
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-test.sh /mnt
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-test.sh | bash -s -- /mnt /root
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-test.sh | bash -s -- /mnt
 # $1 Path to test
-# $2 Path to save
-if [ -z "$1" ] || [ -z "$2" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "Usage: $0 <Path to test> <Path to save>"
-    echo "EXAMPLE: $0 /mnt /root"
+if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+    echo "Usage: $0 <Path to test>"
+    echo "EXAMPLE: $0 /mnt"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "This script will test the disk speed"
         exit 0
     fi
     exit 1
 fi
-TEST_RESULTS_FOLDER="$2/Disk-Test-Results/$(date +%Y_%m_%d_%H_%M)/"
-TEST_LOCATIONS=$1
+TEST_RESULTS_FOLDER="/tmp/Disk-Test-Results/$(date +%Y_%m_%d_%H_%M)/"
 mkdir -p "$TEST_RESULTS_FOLDER"
-for i in "${TEST_LOCATIONS[@]}"; do
-    echo "Testing /mnt/$i ..."
-    (
-    TEST_RESULT_FILE="$(echo "/mnt/$i" | tr / _)_TEST_RESULT.txt"
-    cd "/mnt/$i" || exit
-    fio --ramp_time=5 \
-        --gtod_reduce=1 \
-        --numjobs=1 \
-        --bs=1M \
-        --size=1G \
-        --runtime=60s \
-        --readwrite=readwrite \
-        --name=testfile  > "$TEST_RESULTS_FOLDER$TEST_RESULT_FILE"
-        echo "
+echo "Testing $1 ..."
+TEST_RESULT_FILE="$(echo "$1" | tr / _)_TEST_RESULT.txt"
+cd "$1" || exit
+fio --ramp_time=5 \
+    --gtod_reduce=1 \
+    --numjobs=1 \
+    --bs=1M \
+    --size=1G \
+    --runtime=60s \
+    --readwrite=readwrite \
+    --name=testfile  > "$TEST_RESULTS_FOLDER$TEST_RESULT_FILE"
+    echo "
 ###################################
 ####### $(pwd) #######
 ###################################" >> "$TEST_RESULTS_FOLDER/SUMMARY.txt"
-    grep -e READ -e WRITE "$TEST_RESULTS_FOLDER$TEST_RESULT_FILE" >> "$TEST_RESULTS_FOLDER/SUMMARY.txt"
-    ) &
-done
+grep -e READ -e WRITE "$TEST_RESULTS_FOLDER$TEST_RESULT_FILE" >> "$TEST_RESULTS_FOLDER/SUMMARY.txt"
 echo "
 ##############################
 ########## SUMMARY ###########
 ##############################"
 cat "${TEST_RESULTS_FOLDER}SUMMARY.txt"
-
 echo "Do you want to delete the test files? [y/N]"
 read -r DELETE_TEST_FILES
 if [ "$DELETE_TEST_FILES" == "y" ]; then
-    for i in "${TEST_LOCATIONS[@]}"; do
-        rm -rf "$i/testfile*"
-    done
+    rm -rf "$1/testfile*"
 fi
