@@ -26,13 +26,13 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
 fi
 umount /gfs
 sed -i '/glusterfs/d' /etc/fstab
-apt remove glusterfs-client -y
+apt purge glusterfs-client -y
 sh -c "echo 'y' | gluster volume stop gfs force"
 gluster volume delete gfs force
 systemctl disable glusterd
 systemctl stop glusterd
 umount /mnt/gfs_disk
 sed -i '/gfs_disk/d' /etc/fstab
-apt remove glusterfs-server -y
+apt purge glusterfs-server -y
 apt autoremove -y
 rm -rf /var/lib/glusterd
