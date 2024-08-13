@@ -30,6 +30,7 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
+apt install fio -y
 TEST_RESULTS_FOLDER="/tmp/Disk-Test-Results/$(date +%Y_%m_%d_%H_%M)/"
 mkdir -p "$TEST_RESULTS_FOLDER"
 echo "Testing $1 ..."
