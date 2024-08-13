@@ -54,6 +54,11 @@ gluster peer probe "$SERVER2_IP"
 gluster peer probe "$SERVER3_IP"
 gluster peer status
 gluster pool list
+gluster volume create gfs replica 3 arbiter 1 transport tcp \
+  "$SERVER1_IP":/mnt/gfs_disk/brick1 \
+  "$SERVER2_IP":/mnt/gfs_disk/brick1 \
+  "$SERVER3_IP":/mnt/gfs_disk/brick1 \
+  force
 systemctl stop glusterd.service
 cd /var/lib/glusterd/vols/gfs/ || exit
 mv "gfs.$SERVER1_IP.mnt-gfs_disk-brick1.vol" "gfs.$SERVER1_NAME.mnt-gfs_disk-brick1.vol"
@@ -73,11 +78,6 @@ grep -rnw . -e "$SERVER3_IP"
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
 gluster peer status
-gluster volume create gfs replica 3 arbiter 1 transport tcp \
-  "$SERVER1_IP":/mnt/gfs_disk/brick1 \
-  "$SERVER2_IP":/mnt/gfs_disk/brick1 \
-  "$SERVER3_IP":/mnt/gfs_disk/brick1 \
-  force
 gluster volume start gfs
 gluster volume heal gfs full
 gluster volume heal gfs info
