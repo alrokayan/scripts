@@ -17,9 +17,9 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./ha-hacs /kube-volumes/homeassistant/data
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./ha-lovelace /kube-volumes/homeassistant/data
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-hacs | bash -s -- /kube-volumes/homeassistant/data
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/ha-lovelace | bash -s -- /kube-volumes/homeassistant/data
 # $1 Path to home assistant data volume
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <home assistant data volume path>"
@@ -31,4 +31,16 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 cd "$1" || exit
-wget -O - https://get.hacs.xyz | bash -
+mkdir -p "$1/www/"
+curl -fsSL https://raw.githubusercontent.com/thomasloven/lovelace-fold-entity-row/master/fold-entity-row.js -o "$1/www/fold-entity-row.js"
+curl -fsSL https://raw.githubusercontent.com/thomasloven/lovelace-auto-entities/master/auto-entities.js -o "$1/www/auto-entities.js"
+if ! cat configuration.yaml | grep "fold-entity-row.js"; then
+  echo "-- Adding fold-entity-row.js and auto-entities.js to configuration.yaml"
+  echo '
+frontend:
+  extra_module_url:
+    - /local/fold-entity-row.js
+    - /local/auto-entities.js
+' >> configuration.yaml
+fi
+cat configuration.yaml
