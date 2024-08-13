@@ -32,42 +32,45 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--h
     fi
     exit 1
 fi
-SERVER1_NAME=$(grep $1 /etc/hosts | awk '{print $2}')
-SERVER2_NAME=$(grep $2 /etc/hosts | awk '{print $2}')
-SERVER3_NAME=$(grep $3 /etc/hosts | awk '{print $2}')
+SERVER1_IP="$1"
+SERVER2_IP="$2"
+SERVER3_IP="$3"
+SERVER1_NAME=$(grep "$SERVER1_IP"/etc/hosts | awk '{print $2}')
+SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
+SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
 if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; then
-    echo "/etc/hosts does not contain the following IPs: $1 $2 $3"
+    echo "/etc/hosts does not contain the following IPs: $SERVER1_IP $SERVER2_IP $SERVER3_IP"
     exit 1
 fi
 apt install xfsprogs glusterfs-server glusterfs-client -y
 systemctl enable --now glusterd
-gluster peer probe "$2"
-gluster peer probe "$3"
+gluster peer probe "$SERVER2_IP"
+gluster peer probe "$SERVER3_IP"
 gluster peer status
 gluster pool list
 systemctl stop glusterd.service
 cd /var/lib/glusterd/vols/gfs/ || exit
-mv "gfs.$1.mnt-gfs_disk-brick1.vol" "gfs.$SERVER1_NAME.mnt-gfs_disk-brick1.vol"
-mv "gfs.$2.mnt-gfs_disk-brick1.vol" "gfs.$SERVER2_NAME.mnt-gfs_disk-brick1.vol"
-mv "gfs.$3.mnt-gfs_disk-brick1.vol" "gfs.$SERVER3_NAME.mnt-gfs_disk-brick1.vol"
+mv "gfs.$SERVER1_IP.mnt-gfs_disk-brick1.vol" "gfs.$SERVER1_NAME.mnt-gfs_disk-brick1.vol"
+mv "gfs.$SERVER2_IP.mnt-gfs_disk-brick1.vol" "gfs.$SERVER2_NAME.mnt-gfs_disk-brick1.vol"
+mv "gfs.$SERVER3_IP.mnt-gfs_disk-brick1.vol" "gfs.$SERVER3_NAME.mnt-gfs_disk-brick1.vol"
 cd /var/lib/glusterd/vols/gfs/bricks || exit
-mv "$1:-mnt-gfs_disk-brick1" "$SERVER1_NAME:-mnt-gfs_disk-brick1"
-mv "$2:-mnt-gfs_disk-brick1" "$SERVER2_NAME:-mnt-gfs_disk-brick1"
-mv "$3:-mnt-gfs_disk-brick1" "$SERVER3_NAME:-mnt-gfs_disk-brick1"
+mv "$SERVER1_IP:-mnt-gfs_disk-brick1" "$SERVER1_NAME:-mnt-gfs_disk-brick1"
+mv "$SERVER2_IP:-mnt-gfs_disk-brick1" "$SERVER2_NAME:-mnt-gfs_disk-brick1"
+mv "$SERVER3_IP:-mnt-gfs_disk-brick1" "$SERVER3_NAME:-mnt-gfs_disk-brick1"
 cd /var/lib/glusterd || exit
-find . -type f -exec sed -i "s/$1/$SERVER1_NAME/g" {} \;
-find . -type f -exec sed -i "s/$2/$SERVER2_NAME/g" {} \;
-find . -type f -exec sed -i "s/$3/$SERVER3_NAME/g" {} \;
-grep -rnw . -e "$1"
-grep -rnw . -e "$2"
-grep -rnw . -e "$3"
+find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
+find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
+find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
+grep -rnw . -e "$SERVER1_IP"
+grep -rnw . -e "$SERVER2_IP"
+grep -rnw . -e "$SERVER3_IP"
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
 gluster peer status
 gluster volume create gfs replica 3 arbiter 1 transport tcp \
-  "$1":/mnt/gfs_disk/brick1 \
-  "$2":/mnt/gfs_disk/brick1 \
-  "$3":/mnt/gfs_disk/brick1 \
+  "$SERVER1_IP":/mnt/gfs_disk/brick1 \
+  "$SERVER2_IP":/mnt/gfs_disk/brick1 \
+  "$SERVER3_IP":/mnt/gfs_disk/brick1 \
   force
 gluster volume start gfs
 gluster volume heal gfs full
