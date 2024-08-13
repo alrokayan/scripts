@@ -17,9 +17,9 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-disk-wipe.sh /dev/sdb
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-disk-prep.sh /dev/sdb
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-wipe.sh | bash -s -- /dev/sdb
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-prep.sh | bash -s -- /dev/sdb
 # $1 Disk to wipe, xfs formate, and mount
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <disk to wipe>"

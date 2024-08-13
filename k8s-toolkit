@@ -565,7 +565,14 @@ function step1() {
     break
   done
   echo "-- $HOSTNAME: Resetting iptables"
-  iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+  iptables -F
+  iptables -X
+  iptables -t nat -F
+  iptables -t nat -X
+  iptables -t mangle -F
+  iptables -t mangle -X
+  iptables -P INPUT ACCEPT
+  iptables -P OUTPUT ACCEPT
   ipvsadm -C
   if [[ "$response" != *"000"* ]]; then
     unDeployAll
@@ -758,6 +765,10 @@ cat <<'EOF' >/etc/systemd/system/kill-failed-pods
 while true; do
   for ns in $(kubectl --kubeconfig "/etc/kubernetes/admin.conf" get namespaces -o name | cut -c 11-); do
     for pod in $(kubectl --kubeconfig "/etc/kubernetes/admin.conf" get pods -n "$ns" -o go-template="{{ range  \$item := .items }}{{ range .status.conditions }}{{ if (or (and (eq .type \"PodScheduled\") (eq .status \"False\")) (and (eq .type \"Ready\") (eq .status \"False\"))) }}{{ \$item.metadata.name}} {{ end }}{{ end }}{{ end }}"); do
+        if [[ "$pod" == "kube-multus"* ]]; then
+          MULTUS_HOST=$(kubectl --kubeconfig "/etc/kubernetes/admin.conf" get pods -n "$ns" "$pod" -o jsonpath='{.spec.nodeName}')
+          ssh -i "/root/.ssh/id_rsa" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o LogLevel=ERROR -o ConnectTimeout=5 -o BatchMode=yes -o ServerAliveInterval=30 -o ServerAliveCountMax=3 -o PreferredAuthentications=publickey $MULTUS_HOST rm -f /opt/cni/bin/multus-shim
+        fi
         kubectl --kubeconfig "/etc/kubernetes/admin.conf" delete pods -n "$ns" "$pod" --grace-period=0 --force
     done
   done
