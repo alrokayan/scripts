@@ -32,9 +32,9 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--h
     fi
     exit 1
 fi
-SERVER1_IP="$1"
-SERVER2_IP="$2"
-SERVER3_IP="$3"
+SERVER1_IP=$1
+SERVER2_IP=$2
+SERVER3_IP=$3
 SERVER1_NAME=$(grep "$SERVER1_IP"/etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
 SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
