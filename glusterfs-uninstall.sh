@@ -34,3 +34,4 @@ systemctl stop glusterd
 umount /mnt/gfs_disk
 sed -i '/gfs_disk/d' /etc/fstab
 apt remove glusterfs-server -y
+apt autoremove -y
