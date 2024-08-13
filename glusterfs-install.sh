@@ -38,6 +38,12 @@ SERVER3_IP=$3
 SERVER1_NAME=$(grep "$SERVER1_IP"/etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
 SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
+echo "SERVER1_NAME: $SERVER1_NAME"
+echo "SERVER1_IP: $SERVER1_IP"
+echo "SERVER2_NAME: $SERVER2_NAME"
+echo "SERVER2_IP: $SERVER2_IP"
+echo "SERVER3_NAME: $SERVER3_NAME"
+echo "SERVER3_IP: $SERVER3_IP"
 if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; then
     echo "/etc/hosts does not contain the following IPs: $SERVER1_IP $SERVER2_IP $SERVER3_IP"
     exit 1
