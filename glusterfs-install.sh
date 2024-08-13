@@ -40,9 +40,7 @@ if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; t
     exit 1
 fi
 apt install xfsprogs glusterfs-server glusterfs-client -y
-systemctl enable glusterd
-systemctl start glusterd
-systemctl status glusterd -l --no-pager
+systemctl enable -now glusterd
 gluster peer probe "$2"
 gluster peer probe "$3"
 gluster peer status
@@ -63,8 +61,8 @@ find . -type f -exec sed -i "s/$3/$SERVER3_NAME/g" {} \;
 grep -rnw . -e "$1"
 grep -rnw . -e "$2"
 grep -rnw . -e "$3"
-systemctl enable -now glusterd.service
-systemctl status glusterd.service
+systemctl enable -now glusterd
+systemctl status glusterd -l --no-pager
 gluster peer status
 gluster volume create gfs replica 3 arbiter 1 transport tcp \
   "$1":/mnt/gfs_disk/brick1 \
