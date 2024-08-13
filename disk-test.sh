@@ -54,8 +54,4 @@ echo "
 ########## SUMMARY ###########
 ##############################"
 cat "${TEST_RESULTS_FOLDER}SUMMARY.txt"
-echo "Do you want to delete the test files? [y/N]"
-read -r DELETE_TEST_FILES
-if [ "$DELETE_TEST_FILES" == "y" ]; then
-    rm -rf "$1/testfile*"
-fi
+rm -rf "$1/testfile*"
