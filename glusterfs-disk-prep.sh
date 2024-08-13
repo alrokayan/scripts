@@ -35,6 +35,7 @@ apt install xfsprogs glusterfs-server glusterfs-client -y
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
 umount "$DISK" -f
+sh -c "echo 'w' | fdisk $DISK -w always -W always"
 wipefs -a "$DISK"
 mkfs.xfs "$DISK" -f
 mkdir /mnt/gfs_disk
