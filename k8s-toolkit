@@ -564,16 +564,6 @@ function step1() {
     response="$(curl -w '%{http_code}' -o /dev/null -ILks "https://$IP:6443")"
     break
   done
-  echo "-- $HOSTNAME: Resetting iptables"
-  iptables -F
-  iptables -X
-  iptables -t nat -F
-  iptables -t nat -X
-  iptables -t mangle -F
-  iptables -t mangle -X
-  iptables -P INPUT ACCEPT
-  iptables -P OUTPUT ACCEPT
-  ipvsadm -C
   if [[ "$response" != *"000"* ]]; then
     unDeployAll
     for i in $(kubectl get nodes -o name | cut -c 6-); do
@@ -754,9 +744,21 @@ ____EOF____
     ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" CLUSTER_CIDR_FIRST_TWO_OCTETS="$CLUSTER_CIDR_FIRST_TWO_OCTETS" MASTER_IP="$IP" K8S_VERSION="$K8S_VERSION" SSH_USERNAME="$SSH_USERNAME" "bash -s" <<'____EOF____'
 #!/bin/bash
 echo "-- $HOSTNAME: Initializing k8s master version: $(echo "$K8S_VERSION" | sed 's/-[0-9].*//')"
+ALL_IPS=$(hostname -I)
 kubeadm init  --kubernetes-version $(echo "$K8S_VERSION" | sed 's/-[0-9].*//') \
               --apiserver-advertise-address=$MASTER_IP \
+              --apiserver-cert-extra-sans=$(hostname),${ALL_IPS// /,} \
               --pod-network-cidr=${CLUSTER_CIDR_FIRST_TWO_OCTETS}.0.0/16
+echo "-- $HOSTNAME: Resetting iptables"
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+ipvsadm -C
 echo "-- $HOSTNAME: Creating join.sh"
 kubeadm token create --print-join-command > ~/.kube/join.sh
 echo "-- $HOSTNAME: Auto kill stuck failed pods every 10 minutes"
@@ -811,11 +813,22 @@ ____EOF____
     else
       echo "-- $IP joining the cluster" 
       scp -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" tmp/join.sh "$SSH_USERNAME"@"$IP":~/.kube/join.sh
-      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" i="$i" "bash -s" <<'____EOF____'
+      ssh -i "$PRIVATE_KEY" "$SSH_EXTRA_ARGS" "$SSH_USERNAME"@"$IP" DEBIAN_FRONTEND="noninteractive" i="$i" IP="$IP" "bash -s" <<'____EOF____'
 #!/bin/bash
 chmod +x $HOME/.kube/join.sh
 echo "-- $HOSTNAME: Joining k8s cluster"
-$HOME/.kube/join.sh
+ALL_IPS=$(hostname -I)
+$HOME/.kube/join.sh --apiserver-advertise-address=$IP --apiserver-cert-extra-sans=$(hostname),${ALL_IPS// /,}
+echo "-- $HOSTNAME: Resetting iptables"
+iptables -F
+iptables -X
+iptables -t nat -F
+iptables -t nat -X
+iptables -t mangle -F
+iptables -t mangle -X
+iptables -P INPUT ACCEPT
+iptables -P OUTPUT ACCEPT
+ipvsadm -C
 echo "-- $HOSTNAME: Completed"
 ____EOF____
     fi
