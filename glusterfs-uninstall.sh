@@ -27,7 +27,7 @@ fi
 umount /gfs
 sed -i '/glusterfs/d' /etc/fstab
 apt remove glusterfs-client -y
-echo "y" | gluster volume stop gfs force
+printf "y" | gluster volume stop gfs force
 gluster volume delete gfs force
 systemctl disable glusterd
 systemctl stop glusterd
