@@ -32,6 +32,7 @@ function removeGFS {
     rm -f /etc/systemd/system/$GFS_VOLUME.mount
     umount "/$GFS_VOLUME" 2>/dev/null
     sed -i '/glusterfs/d' /etc/fstab
+    sed -i '/\/mnt\/'"${GFS_VOLUME}"'_disk/d' /etc/fstab
     sh -c "echo 'y' | gluster volume stop $GFS_VOLUME force"
     gluster volume delete $GFS_VOLUME force
     umount "/mnt/${GFS_VOLUME}_disk"

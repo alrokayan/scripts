@@ -33,7 +33,7 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--h
     exit 1
 fi
 function createGFS {
-    echo "GFS_VOLUME: $GFS_VOLUME"
+    echo "GFS_VOLUME: ${GFS_VOLUME}"
     echo "SERVER1_NAME: $SERVER1_NAME"
     echo "SERVER1_IP: $SERVER1_IP"
     echo "SERVER2_NAME: $SERVER2_NAME"
@@ -49,21 +49,21 @@ function createGFS {
     gluster peer probe "$SERVER3_IP"
     gluster peer status
     gluster pool list
-    gluster volume create $GFS_VOLUME replica 3 arbiter 1 transport tcp \
-    "$SERVER1_IP":/mnt/$GFS_VOLUME_disk/brick1 \
-    "$SERVER2_IP":/mnt/$GFS_VOLUME_disk/brick1 \
-    "$SERVER3_IP":/mnt/$GFS_VOLUME_disk/brick1 \
+    gluster volume create ${GFS_VOLUME} replica 3 arbiter 1 transport tcp \
+    "$SERVER1_IP":/mnt/${GFS_VOLUME}_disk/brick1 \
+    "$SERVER2_IP":/mnt/${GFS_VOLUME}_disk/brick1 \
+    "$SERVER3_IP":/mnt/${GFS_VOLUME}_disk/brick1 \
     force
-    gluster volume start $GFS_VOLUME
+    gluster volume start ${GFS_VOLUME}
     systemctl stop glusterd
-    cd /var/lib/glusterd/vols/$GFS_VOLUME/ || exit
-    mv "$GFS_VOLUME.$SERVER1_IP.mnt-$GFS_VOLUME_disk-brick1.vol" "$GFS_VOLUME.$SERVER1_NAME.mnt-$GFS_VOLUME_disk-brick1.vol"
-    mv "$GFS_VOLUME.$SERVER2_IP.mnt-$GFS_VOLUME_disk-brick1.vol" "$GFS_VOLUME.$SERVER2_NAME.mnt-$GFS_VOLUME_disk-brick1.vol"
-    mv "$GFS_VOLUME.$SERVER3_IP.mnt-$GFS_VOLUME_disk-brick1.vol" "$GFS_VOLUME.$SERVER3_NAME.mnt-$GFS_VOLUME_disk-brick1.vol"
-    cd /var/lib/glusterd/vols/$GFS_VOLUME/bricks || exit
-    mv "$SERVER1_IP:-mnt-$GFS_VOLUME_disk-brick1" "$SERVER1_NAME:-mnt-$GFS_VOLUME_disk-brick1"
-    mv "$SERVER2_IP:-mnt-$GFS_VOLUME_disk-brick1" "$SERVER2_NAME:-mnt-$GFS_VOLUME_disk-brick1"
-    mv "$SERVER3_IP:-mnt-$GFS_VOLUME_disk-brick1" "$SERVER3_NAME:-mnt-$GFS_VOLUME_disk-brick1"
+    cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
+    mv "${GFS_VOLUME}.$SERVER1_IP.mnt-${GFS_VOLUME}_disk-brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-${GFS_VOLUME}_disk-brick1.vol"
+    mv "${GFS_VOLUME}.$SERVER2_IP.mnt-${GFS_VOLUME}_disk-brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-${GFS_VOLUME}_disk-brick1.vol"
+    mv "${GFS_VOLUME}.$SERVER3_IP.mnt-${GFS_VOLUME}_disk-brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-${GFS_VOLUME}_disk-brick1.vol"
+    cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
+    mv "$SERVER1_IP:-mnt-${GFS_VOLUME}_disk-brick1" "$SERVER1_NAME:-mnt-${GFS_VOLUME}_disk-brick1"
+    mv "$SERVER2_IP:-mnt-${GFS_VOLUME}_disk-brick1" "$SERVER2_NAME:-mnt-${GFS_VOLUME}_disk-brick1"
+    mv "$SERVER3_IP:-mnt-${GFS_VOLUME}_disk-brick1" "$SERVER3_NAME:-mnt-${GFS_VOLUME}_disk-brick1"
     cd /var/lib/glusterd || exit
     find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
     find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
@@ -76,10 +76,10 @@ function createGFS {
     grep -rnw . -e "$SERVER3_NAME"
     systemctl enable --now glusterd
     systemctl status glusterd -l --no-pager
-    gluster volume set $GFS_VOLUME group my-samba
+    gluster volume set ${GFS_VOLUME} group my-samba
     gluster peer status
-    gluster volume status $GFS_VOLUME
-    gluster volume info $GFS_VOLUME
+    gluster volume status ${GFS_VOLUME}
+    gluster volume info ${GFS_VOLUME}
 }
 apt install glusterfs-server glusterfs-client ctdb samba -y
 systemctl enable --now glusterd
