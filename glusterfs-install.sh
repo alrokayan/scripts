@@ -83,7 +83,6 @@ systemctl status glusterd -l --no-pager
 gluster peer status
 gluster volume heal gfs full
 gluster volume heal gfs info
-gluster volume quota gfs enable
 gluster volume status
 gluster volume info
 
