@@ -48,9 +48,9 @@ function createGFS {
     gluster volume status ${GFS_VOLUME}
     gluster volume info ${GFS_VOLUME}
 }
+apt update -y
+apt upgrade -y
 apt install glusterfs-server glusterfs-client ctdb samba -y
-systemctl enable --now glusterd
-systemctl status glusterd -l --no-pager
 cat << EOF > /var/lib/glusterd/groups/my-samba
 cluster.self-heal-daemon=enable
 performance.cache-invalidation=on
@@ -73,6 +73,8 @@ cluster.metadata-self-heal=on
 cluster.entry-self-heal=on
 cluster.force-migration=disable
 EOF
+systemctl enable --now glusterd
+systemctl status glusterd -l --no-pager
 GFS_VOLUME="gfs"
 SERVER1_IP=$1
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
@@ -81,3 +83,12 @@ GFS_VOLUME="ctdb"
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
 createGFS
+
+systemctl enable --now samba-ad-dc
+systemctl status samba-ad-dc -l --no-pager
+systemctl enable --now ctdb
+systemctl status ctdb -l --no-pager
+
+
+cat /etc/fstab | grep ctdb
+ls -al /etc/sysconfig/ctdb

@@ -34,6 +34,8 @@ function diskGFS {
     mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick"
     df -h | grep "${GFS_VOLUME}"
 }
+apt update -y
+apt upgrade -y
 apt install xfsprogs -y
 DISK=$1
 umount "/dev/$DISK" -f
