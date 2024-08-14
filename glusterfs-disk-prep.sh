@@ -31,13 +31,7 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 function diskGFS {
-    mkdir "/mnt/${GFS_VOLUME}_disk"
-    echo "$DISK /mnt/${GFS_VOLUME}_disk xfs defaults 1 2" >> /etc/fstab
-    systemctl daemon-reload
-    mount -a
-    mount | grep "/mnt/${GFS_VOLUME}_disk"
-    mkdir "/mnt/${GFS_VOLUME}_disk/brick1"
-    ls -al "/mnt/${GFS_VOLUME}_disk/brick1"
+    mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick"
     df -h | grep "${GFS_VOLUME}"
 }
 apt install xfsprogs -y
@@ -46,6 +40,11 @@ umount "$DISK" -f
 sh -c "echo 'w' | sleep 1 | fdisk $DISK -w always -W always"
 wipefs -a "$DISK"
 mkfs.xfs "$DISK" -f
+mkdir "/mnt/gluster_disk_$DISK"
+echo "$DISK /mnt/gluster_disk_$DISK xfs defaults 1 2" >> /etc/fstab
+systemctl daemon-reload
+mount -a
+mount | grep "/mnt/gluster_disk_$DISK"
 GFS_VOLUME="gfs"
 diskGFS
 GFS_VOLUME="ctdb"

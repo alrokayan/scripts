@@ -50,20 +50,20 @@ function createGFS {
     gluster peer status
     gluster pool list
     gluster volume create ${GFS_VOLUME} replica 3 arbiter 1 transport tcp \
-    "$SERVER1_IP":/mnt/${GFS_VOLUME}_disk/brick1 \
-    "$SERVER2_IP":/mnt/${GFS_VOLUME}_disk/brick1 \
-    "$SERVER3_IP":/mnt/${GFS_VOLUME}_disk/brick1 \
+    "$SERVER1_IP":/mnt/${GFS_VOLUME}_disk/brick \
+    "$SERVER2_IP":/mnt/${GFS_VOLUME}_disk/brick \
+    "$SERVER3_IP":/mnt/${GFS_VOLUME}_disk/brick \
     force
     gluster volume start ${GFS_VOLUME}
     systemctl stop glusterd
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
-    mv "${GFS_VOLUME}.$SERVER1_IP.mnt-${GFS_VOLUME}_disk-brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-${GFS_VOLUME}_disk-brick1.vol"
-    mv "${GFS_VOLUME}.$SERVER2_IP.mnt-${GFS_VOLUME}_disk-brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-${GFS_VOLUME}_disk-brick1.vol"
-    mv "${GFS_VOLUME}.$SERVER3_IP.mnt-${GFS_VOLUME}_disk-brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-${GFS_VOLUME}_disk-brick1.vol"
+    mv "${GFS_VOLUME}.$SERVER1_IP.mnt-${GFS_VOLUME}_disk-brick.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-${GFS_VOLUME}_disk-brick.vol"
+    mv "${GFS_VOLUME}.$SERVER2_IP.mnt-${GFS_VOLUME}_disk-brick.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-${GFS_VOLUME}_disk-brick.vol"
+    mv "${GFS_VOLUME}.$SERVER3_IP.mnt-${GFS_VOLUME}_disk-brick.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-${GFS_VOLUME}_disk-brick.vol"
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
-    mv "$SERVER1_IP:-mnt-${GFS_VOLUME}_disk-brick1" "$SERVER1_NAME:-mnt-${GFS_VOLUME}_disk-brick1"
-    mv "$SERVER2_IP:-mnt-${GFS_VOLUME}_disk-brick1" "$SERVER2_NAME:-mnt-${GFS_VOLUME}_disk-brick1"
-    mv "$SERVER3_IP:-mnt-${GFS_VOLUME}_disk-brick1" "$SERVER3_NAME:-mnt-${GFS_VOLUME}_disk-brick1"
+    mv "$SERVER1_IP:-mnt-${GFS_VOLUME}_disk-brick" "$SERVER1_NAME:-mnt-${GFS_VOLUME}_disk-brick"
+    mv "$SERVER2_IP:-mnt-${GFS_VOLUME}_disk-brick" "$SERVER2_NAME:-mnt-${GFS_VOLUME}_disk-brick"
+    mv "$SERVER3_IP:-mnt-${GFS_VOLUME}_disk-brick" "$SERVER3_NAME:-mnt-${GFS_VOLUME}_disk-brick"
     cd /var/lib/glusterd || exit
     find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
     find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
