@@ -111,41 +111,39 @@ gluster peer status
 gluster pool list
 GFS_VOLUME="gfs"
 createGFS
-gluster volume set ${GFS_VOLUME} group my-samba
-GFS_VOLUME="ctdb"
-sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
-sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
-createGFS
-cat << EOF > /etc/ctdb/nodes
-$SERVER1_IP
-$SERVER2_IP
-$SERVER3_IP
-EOF
-cat << EOF > /etc/ctdb/public_addresses
-10.10.1.10/16 eno1
-10.10.1.11/16 eno1
-10.10.1.12/16 eno1
-EOF
-sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
-echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >> /etc/ctdb/script.options
-systemctl enable --now ctdb
-systemctl status ctdb -l --no-pager
-ctdb status
-ctdb ip
-ctdb ping
-cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
-cat << EOF >> /etc/samba/smb.conf
-kernel share modes = no
-kernel oplocks = no
-map archive = no
-map hidden = no
-map read only = no
-map system = no
-store dos attributes = yes
-EOF
-systemctl enable --now glusterd
-systemctl status glusterd -l --no-pager
-systemctl enable --now ctdb
-systemctl status ctdb -l --no-pager
-systemctl enable --now samba-ad-dc
-systemctl status samba-ad-dc -l --no-pager
+# gluster volume set ${GFS_VOLUME} group my-samba
+# GFS_VOLUME="ctdb"
+# sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
+# sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
+# createGFS
+# cat << EOF > /etc/ctdb/nodes
+# $SERVER1_IP
+# $SERVER2_IP
+# $SERVER3_IP
+# EOF
+# cat << EOF > /etc/ctdb/public_addresses
+# 10.10.1.10/16 eno1
+# 10.10.1.11/16 eno1
+# 10.10.1.12/16 eno1
+# EOF
+# sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
+# echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >> /etc/ctdb/script.options
+# systemctl enable --now ctdb
+# systemctl status ctdb -l --no-pager
+# ctdb status
+# ctdb ip
+# ctdb ping
+# cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
+# cat << EOF >> /etc/samba/smb.conf
+# kernel share modes = no
+# kernel oplocks = no
+# map archive = no
+# map hidden = no
+# map read only = no
+# map system = no
+# store dos attributes = yes
+# EOF
+# systemctl enable --now ctdb
+# systemctl status ctdb -l --no-pager
+# systemctl enable --now samba-ad-dc
+# systemctl status samba-ad-dc -l --no-pager
