@@ -24,15 +24,30 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "This script will uninstall glusterfs"
     exit 1
 fi
-umount /gfs
-sed -i '/glusterfs/d' /etc/fstab
-apt purge glusterfs-client -y
-sh -c "echo 'y' | gluster volume stop gfs force"
-gluster volume delete gfs force
+function removeGFS {
+    systemctl disable "$GFS_VOLUME.mount"
+    systemctl stop "$GFS_VOLUME.mount"
+    systemctl status "$GFS_VOLUME.mount" -l --no-pager
+    systemctl daemon-reload
+    rm -f /etc/systemd/system/$GFS_VOLUME.mount
+    umount "/$GFS_VOLUME" 2>/dev/null
+    sed -i '/glusterfs/d' /etc/fstab
+    sh -c "echo 'y' | gluster volume stop $GFS_VOLUME force"
+    gluster volume delete $GFS_VOLUME force
+    umount "/mnt/${GFS_VOLUME}_disk"
+    sed -i '/'"${GFS_VOLUME}_disk"'/d' /etc/fstab
+}
+GFS_VOLUME="gfs"
+removeGFS
+GFS_VOLUME="ctdb"
+removeGFS
 systemctl disable glusterd
 systemctl stop glusterd
-umount /mnt/gfs_disk
-sed -i '/gfs_disk/d' /etc/fstab
-apt purge glusterfs-server -y
+apt purge glusterfs-client glusterfs-server ctdb samba -y
 apt autoremove -y
 rm -rf /var/lib/glusterd
+rm -rf /var/lib/ctdb
+rm -rf /var/lib/samba
+rm -rf /etc/glusterfs
+rm -rf /etc/ctdb
+rm -rf /etc/samba

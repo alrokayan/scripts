@@ -30,18 +30,24 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
+function diskGFS {
+    mkdir "/mnt/$GFS_VOLUME_disk"
+    echo "$DISK /mnt/$GFS_VOLUME_disk xfs defaults 1 2" >> /etc/fstab
+    systemctl daemon-reload
+    mount -a
+    mount | grep "/mnt/$GFS_VOLUME_disk"
+    mkdir "/mnt/$GFS_VOLUME_disk/brick1"
+    df -h | grep "$GFS_VOLUME"
+}
+apt install xfsprogs -y
 DISK=$1
 umount "$DISK" -f
 sh -c "echo 'w' | fdisk $DISK -w always -W always"
 wipefs -a "$DISK"
 mkfs.xfs "$DISK" -f
-mkdir /mnt/gfs_disk
-apt install xfsprogs glusterfs-server glusterfs-client -y
-systemctl enable --now glusterd
-systemctl status glusterd -l --no-pager
-echo "$DISK /mnt/gfs_disk xfs defaults 1 2" >> /etc/fstab
-systemctl daemon-reload
-mount -a
-mount | grep /mnt/gfs_disk
-mkdir /mnt/gfs_disk/brick1
-df -h | grep gfs
+GFS_VOLUME="gfs"
+diskGFS
+GFS_VOLUME="ctdb"
+diskGFS
+
+
