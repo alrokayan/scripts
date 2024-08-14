@@ -52,6 +52,6 @@ GFS_VOLUME="gfs"
 diskGFS
 GFS_VOLUME="ctdb"
 diskGFS
-
-
-
+apt install glusterfs-server -y
+systemctl enable --now glusterd
+systemctl status glusterd -l --no-pager

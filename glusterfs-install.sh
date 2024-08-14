@@ -69,9 +69,6 @@ apt update -y
 apt upgrade -y
 apt install samba -y
 apt install ctdb -y
-apt install glusterfs-server -y
-systemctl enable --now glusterd
-systemctl status glusterd -l --no-pager
 cat << EOF > /var/lib/glusterd/groups/my-samba
 cluster.self-heal-daemon=enable
 performance.cache-invalidation=on
@@ -94,9 +91,9 @@ cluster.metadata-self-heal=on
 cluster.entry-self-heal=on
 cluster.force-migration=disable
 EOF
-SERVER1_IP=$1
-SERVER2_IP=$2
-SERVER3_IP=$3
+SERVER1_IP=10.10.1.10
+SERVER2_IP=10.10.1.11
+SERVER3_IP=10.10.1.12
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
 SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
