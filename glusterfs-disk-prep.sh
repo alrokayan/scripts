@@ -31,7 +31,7 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     exit 1
 fi
 function diskGFS {
-    mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick"
+    mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1"
     df -h | grep "${GFS_VOLUME}"
 }
 apt update -y
