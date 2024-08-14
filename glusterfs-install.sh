@@ -149,5 +149,9 @@ map read only = no
 map system = no
 store dos attributes = yes
 EOF
+systemctl enable --now glusterd
+systemctl status glusterd -l --no-pager
+systemctl enable --now ctdb
+systemctl status ctdb -l --no-pager
 systemctl enable --now samba-ad-dc
 systemctl status samba-ad-dc -l --no-pager
