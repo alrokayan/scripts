@@ -40,6 +40,7 @@ umount "/dev/$DISK" -f
 sh -c "echo 'w' | sleep 1 | fdisk /dev/$DISK -w always -W always"
 wipefs -a "/dev/$DISK"
 mkfs.xfs "/dev/$DISK" -f
+rm -rf "/mnt/gluster_disk_$DISK"
 mkdir "/mnt/gluster_disk_$DISK"
 echo "/dev/$DISK /mnt/gluster_disk_$DISK xfs defaults 1 2" >> /etc/fstab
 systemctl daemon-reload
