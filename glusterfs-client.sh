@@ -6,9 +6,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-#  
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -28,6 +28,32 @@ apt install -y glusterfs-client
 umount /gfs -f 2>/dev/null
 rm -rf /gfs
 mkdir /gfs
-echo "localhost:gfs /gfs glusterfs defaults,_netdev 0 0" >> /etc/fstab
-mount -a
-mount | grep /gfs
+echo "-- Mounting /gfs"
+cat >"/etc/systemd/system/gfs.mount" <<EOF
+[Unit]
+Description=Mounting /gfs
+Requires=network-online.target
+After=network.target glusterd.service
+#
+# Replaces this line in fstab
+#localhost:gfs /gfs glusterfs defaults,_netdev 0 0
+#
+[Mount]
+RemainAfterExit=true
+ExecStartPre=/usr/sbin/gluster volume list
+ExecStart=/bin/mount -a -t glusterfs
+Restart=on-failure
+RestartSec=3
+What=localhost:gfs
+Where=/gfs
+Type=glusterfs
+Options=defaults,_netdev
+
+[Install]
+WantedBy=multi-user.target
+EOF
+systemctl daemon-reload
+systemctl enable --now "gfs.mount"
+systemctl status "gfs.mount" -l --no-pager
+ls -al /gfs
+df -h | grep gfs

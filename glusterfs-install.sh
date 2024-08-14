@@ -32,6 +32,27 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--h
     fi
     exit 1
 fi
+cat << EOF > /var/lib/glusterd/groups/my-samba
+cluster.self-heal-daemon=enable
+performance.cache-invalidation=on
+server.event-threads=4
+client.event-threads=4
+performance.parallel-readdir=on
+performance.readdir-ahead=on
+performance.nl-cache-timeout=600
+performance.nl-cache=on
+network.inode-lru-limit=200000
+performance.md-cache-timeout=600
+performance.stat-prefetch=on
+performance.cache-samba-metadata=on
+features.cache-invalidation-timeout=600
+features.cache-invalidation=on
+nfs.disable=on
+cluster.data-self-heal=on
+cluster.metadata-self-heal=on
+cluster.entry-self-heal=on
+cluster.force-migration=disable
+EOF
 SERVER1_IP=$1
 SERVER2_IP=$2
 SERVER3_IP=$3
@@ -80,9 +101,8 @@ grep -rnw . -e "$SERVER2_NAME"
 grep -rnw . -e "$SERVER3_NAME"
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
+gluster volume set gfs group my-samba
 gluster peer status
-gluster volume heal gfs full
-gluster volume heal gfs info
 gluster volume status
 gluster volume info
 
