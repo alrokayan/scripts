@@ -17,13 +17,13 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-disk-prep.sh /dev/sdb
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-disk-prep.sh sdb
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-prep.sh | bash -s -- /dev/sdb
-# $1 Disk to wipe, xfs formate, and mount
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-disk-prep.sh | bash -s -- sdb
+# $1 Disk (without /dev) to wipe, xfs formate, and mount
 if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <disk to wipe>"
-    echo "EXAMPLE: $0 /dev/sdb"
+    echo "EXAMPLE: $0 sdb"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "This script will wipe, format, and mount a disk for glusterfs"
         exit 0
@@ -36,12 +36,12 @@ function diskGFS {
 }
 apt install xfsprogs -y
 DISK=$1
-umount "$DISK" -f
-sh -c "echo 'w' | sleep 1 | fdisk $DISK -w always -W always"
-wipefs -a "$DISK"
-mkfs.xfs "$DISK" -f
+umount "/dev/$DISK" -f
+sh -c "echo 'w' | sleep 1 | fdisk /dev/$DISK -w always -W always"
+wipefs -a "/dev/$DISK"
+mkfs.xfs "/dev/$DISK" -f
 mkdir "/mnt/gluster_disk_$DISK"
-echo "$DISK /mnt/gluster_disk_$DISK xfs defaults 1 2" >> /etc/fstab
+echo "/dev/$DISK /mnt/gluster_disk_$DISK xfs defaults 1 2" >> /etc/fstab
 systemctl daemon-reload
 mount -a
 mount | grep "/mnt/gluster_disk_$DISK"
