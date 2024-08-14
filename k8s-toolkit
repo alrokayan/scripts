@@ -28,10 +28,21 @@ if [ -z "$1" ]; then
 else
   ENV_FILE="$1"
 fi
-if ! [ -f _include ]; then curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include -o _include && chmod +x _include; fi
+mkdir -p tmp
+if ! [ -f tmp/_include ]; then
+  if [ -f scripts/_include ]; then
+    cp scripts/_include tmp/_include
+  else
+    if [ -f _include ]; then
+      cp _include tmp/_include
+    else
+      curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include -o tmp/_include && chmod +x tmp/_include
+    fi
+  fi
+fi
 if ! [ -f "$ENV_FILE" ]; then touch "$ENV_FILE"; fi
 mkdir -p tmp
-. _include
+. tmp/_include
 if ! grep "export SSH_EXTRA_ARGS=" "$ENV_FILE"; then
   echo 'export SSH_EXTRA_ARGS="-o StrictHostKeyChecking=no"' >> "$ENV_FILE"
 fi
@@ -474,7 +485,7 @@ function unDeployAll() {
   (
     if ! [ -f tmp/multus-daemonset-thick.yml ]; then
       curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml -o tmp/multus-daemonset-thick.yml
-      sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/multus-daemonset-thick.yml
+      sed -i.ORIGINAL 's/namespace: kube-system/namespace: kube-network/g' tmp/multus-daemonset-thick.yml
     fi
     kubectl delete -n kube-network -f tmp/multus-daemonset-thick.yml --grace-period=0 --force
   ) &
@@ -482,7 +493,7 @@ function unDeployAll() {
   (
     if ! [ -f tmp/dhcp-daemonset.yml ]; then
       curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/reference-deployment/master/multus-dhcp/dhcp-daemonset.yml -o tmp/dhcp-daemonset.yml
-      sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
+      sed -i.ORIGINAL 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
     fi
     kubectl delete -n kube-network -f tmp/dhcp-daemonset.yml --grace-period=0 --force
   ) &
@@ -899,11 +910,11 @@ ____EOF____
     echo "-- Deploying Multus" 
     rm -f tmp/multus-daemonset-thick.yml
     curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/multus-cni/master/deployments/multus-daemonset-thick.yml -o tmp/multus-daemonset-thick.yml
-    sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/multus-daemonset-thick.yml
+    sed -i.ORIGINAL 's/namespace: kube-system/namespace: kube-network/g' tmp/multus-daemonset-thick.yml
     kubectl apply -n kube-network -f tmp/multus-daemonset-thick.yml
     echo "-- Deploying DHCP CNI plugin" 
     curl --silent -fsSL https://raw.githubusercontent.com/k8snetworkplumbingwg/reference-deployment/master/multus-dhcp/dhcp-daemonset.yml -o tmp/dhcp-daemonset.yml
-    sed -i.BACKUP 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
+    sed -i.ORIGINAL 's/namespace: kube-system/namespace: kube-network/g' tmp/dhcp-daemonset.yml
     kubectl apply -n kube-network -f tmp/dhcp-daemonset.yml
     wait
     sleep 5

@@ -64,15 +64,15 @@ mounts:
 ssh_authorized_keys:
   - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQDFKVH03XmRMoKjPVwpaNfi4cxR6FI9n6ZLojZ8aRFl6OTbH5hkjPU5Q9sZYGAucOVLdD4p85KsNFedFHljxP5oGXvRp2SM8H423Y6CaTG39f3gfru2jaHMRCMuSw4hcf70Jxvm7spYodoUL/dJVJCX6RK0EnQCyutD3L4evuviYv2bzl13z4meDiVREHg5M5HhW7ImGm4IGQwvUNaKYblblHDMHHgMp2Cc2aHGVq8TFj0xj7j64fvlCnjOvIB04/j3ZPeDGOGEw5YG0CrrqkHyTWgP7IczD20WUYG1jZ6jr/HYQwUksGYfGM9MKuZdm2ORSWJNYVNsc9lzxMGMqubJrBqx5lzmEckbESnYa1hDZKcC6J7zkSPTPsqVkRA/+X3JHAT81Vaz9l2lcQgSSheO/J1W+lMU3kZuEbI6VKnRlRkwWT/iPHxyO7yB/4LYNbnOtoexpiv53H5mwzpmAGNvTIjteVp6TRYLD6CF7vnT1dTsc7bmHUTHHc1NT61ZkFs= mohammed@alrokayan.com
 runcmd:
-  - sed -i.BACKUP '/#PermitRootLogin prohibit-password/c\PermitRootLogin yes' /etc/ssh/sshd_config
-  - sed -i.BACKUP '/#PasswordAuthentication yes/c\PasswordAuthentication yes' /etc/ssh/sshd_config
-  - sed -i.BACKUP '/KbdInteractiveAuthentication no/c\KbdInteractiveAuthentication yes' /etc/ssh/sshd_config
-  - sed -i.BACKUP '/#   StrictHostKeyChecking ask/c\    StrictHostKeyChecking no' /etc/ssh/ssh_config
-  - sed -i.BACKUP '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
-  - sed -i.BACKUP '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf
-  - sed -i.BACKUP '/#DefaultTimeoutStopSec=90s/c\DefaultTimeoutStopSec=10s' /etc/systemd/system.conf
-  - sed -i.BACKUP 's/GRUB_CMDLINE_LINUX_DEFAULT=\"/&usbcore.autosuspend=-1 /' /etc/default/grub
-  - sed -i.BACKUP '/.*#DNSStubListener=.*/ c\DNSStubListener=no' /etc/systemd/resolved.conf
+  - sed -i '' '/#PermitRootLogin prohibit-password/c\PermitRootLogin yes' /etc/ssh/sshd_config
+  - sed -i '' '/#PasswordAuthentication yes/c\PasswordAuthentication yes' /etc/ssh/sshd_config
+  - sed -i '' '/KbdInteractiveAuthentication no/c\KbdInteractiveAuthentication yes' /etc/ssh/sshd_config
+  - sed -i '' '/#   StrictHostKeyChecking ask/c\    StrictHostKeyChecking no' /etc/ssh/ssh_config
+  - sed -i '' '/#net.ipv4.ip_forward=1/c\net.ipv4.ip_forward=1' /etc/sysctl.conf
+  - sed -i '' '/#net.ipv6.conf.all.forwarding=1/c\net.ipv6.conf.all.forwarding=1' /etc/sysctl.conf
+  - sed -i '' '/#DefaultTimeoutStopSec=90s/c\DefaultTimeoutStopSec=10s' /etc/systemd/system.conf
+  - sed -i '' 's/GRUB_CMDLINE_LINUX_DEFAULT=\"/&usbcore.autosuspend=-1 /' /etc/default/grub
+  - sed -i '' '/.*#DNSStubListener=.*/ c\DNSStubListener=no' /etc/systemd/resolved.conf
   - echo 'ubuntu ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
   - echo 'alrokayan ALL=(ALL) NOPASSWD:ALL' >> /etc/sudoers
   - update-grub
