@@ -41,7 +41,7 @@ removeGFS
 systemctl disable glusterd
 systemctl stop glusterd
 sed -i '/glusterfs/d' /etc/fstab
-sed -i '/mnt/gluster_disk/d' /etc/fstab
+sed -i '/mnt\/gluster_disk/d' /etc/fstab
 umount -f "/mnt/gluster_disk_*"
 apt purge glusterfs-client glusterfs-server ctdb samba -y
 apt autoremove -y
