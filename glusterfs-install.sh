@@ -56,14 +56,11 @@ function createGFS {
     grep -rnw . -e "$SERVER1_IP"
     grep -rnw . -e "$SERVER2_IP"
     grep -rnw . -e "$SERVER3_IP"
-    grep -rnw . -e "$SERVER1_NAME"
-    grep -rnw . -e "$SERVER2_NAME"
-    grep -rnw . -e "$SERVER3_NAME"
     systemctl enable --now glusterd
     systemctl status glusterd -l --no-pager
     gluster peer status
-    gluster volume status ${GFS_VOLUME}
-    gluster volume info ${GFS_VOLUME}
+    gluster volume status
+    gluster volume info
 }
 apt update -y
 apt upgrade -y
