@@ -45,10 +45,11 @@ sed -i '/mnt\/gluster_disk/d' /etc/fstab
 umount -f "/mnt/gluster_disk_*"
 apt update -y
 apt upgrade -y
-apt purge glusterfs-client  -y
-apt autoremove -y
-apt purge glusterfs-server ctdb samba -y
-apt autoremove -y
+apt remove --purge glusterfs-client glusterfs-server ctdb samba samba-* -y
+dpkg --configure -a
+apt install -f
+apt --purge autoremove -y
+apt clean
 rm -rf /var/lib/glusterd
 rm -rf /var/lib/ctdb
 rm -rf /var/lib/samba

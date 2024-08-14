@@ -28,9 +28,9 @@ function createGFS {
     gluster peer probe "$SERVER1_IP"
     gluster peer status
     gluster pool list
-    gluster volume create ${GFS_VOLUME} replica 1 arbiter 1 transport tcp \
-    "$SERVER1_IP":/mnt/${GFS_VOLUME}_disk/brick \
-    force
+    gluster volume create ${GFS_VOLUME} \
+                          "$SERVER1_IP":/mnt/${GFS_VOLUME}_disk/brick \
+                          force
     gluster volume start ${GFS_VOLUME}
     systemctl stop glusterd
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
@@ -43,14 +43,15 @@ function createGFS {
     grep -rnw . -e "$SERVER1_NAME"
     systemctl enable --now glusterd
     systemctl status glusterd -l --no-pager
-    gluster volume set ${GFS_VOLUME} group my-samba
     gluster peer status
     gluster volume status ${GFS_VOLUME}
     gluster volume info ${GFS_VOLUME}
 }
 apt update -y
 apt upgrade -y
-apt install glusterfs-server glusterfs-client ctdb samba -y
+apt install samba -y
+apt install ctdb -y
+apt install glusterfs-server -y
 cat << EOF > /var/lib/glusterd/groups/my-samba
 cluster.self-heal-daemon=enable
 performance.cache-invalidation=on
@@ -79,16 +80,36 @@ GFS_VOLUME="gfs"
 SERVER1_IP=$1
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
 createGFS
+gluster volume set ${GFS_VOLUME} group my-samba
+gluster volume set ${GFS_VOLUME} storage.batch-fsync-delay-usec 0
 GFS_VOLUME="ctdb"
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
 createGFS
-
-systemctl enable --now samba-ad-dc
-systemctl status samba-ad-dc -l --no-pager
+cat << EOF > /etc/ctdb/nodes
+10.0.0.12
+EOF
+cat << EOF > /etc/ctdb/public_addresses
+10.10.1.12/16 eno1
+EOF
+sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
+echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >> /etc/ctdb/script.options
 systemctl enable --now ctdb
 systemctl status ctdb -l --no-pager
+ctdb status
+ctdb ip
+ctdb ping
+cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
+cat << EOF >> /etc/samba/smb.conf
+kernel share modes = no
+kernel oplocks = no
+map archive = no
+map hidden = no
+map read only = no
+map system = no
+store dos attributes = yes
+EOF
+systemctl enable --now samba-ad-dc
+systemctl status samba-ad-dc -l --no-pager
 
 
-cat /etc/fstab | grep ctdb
-ls -al /etc/sysconfig/ctdb
