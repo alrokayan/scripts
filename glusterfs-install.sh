@@ -23,6 +23,10 @@
 # $1 Server1 IP
 # $2 Server2 IP
 # $3 Server3 IP
+# $4 SERVER1 PUBLIC IP WITH CIDR
+# $5 SERVER2 PUBLIC IP WITH CIDR
+# $6 SERVER3 PUBLIC IP WITH CIDR
+# $7 NETWORK INTERFACE CARD
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP>"
     echo "EXAMPLE: $0 192.168.0.2 192.168.0.3 192.168.0.4"
@@ -40,6 +44,7 @@ function createGFS {
     "$SERVER3_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
     force
     gluster volume start ${GFS_VOLUME}
+    ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ---- BELOW ----
     systemctl stop glusterd
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
     mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
@@ -56,6 +61,7 @@ function createGFS {
     grep -rnw . -e "$SERVER1_IP"
     grep -rnw . -e "$SERVER2_IP"
     grep -rnw . -e "$SERVER3_IP"
+    ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ------ ABOVE ------
     systemctl enable --now glusterd
     systemctl status glusterd -l --no-pager
     gluster peer status
@@ -88,9 +94,13 @@ cluster.metadata-self-heal=on
 cluster.entry-self-heal=on
 cluster.force-migration=disable
 EOF
-SERVER1_IP=10.10.1.10
-SERVER2_IP=10.10.1.11
-SERVER3_IP=10.10.1.12
+SERVER1_IP=$1
+SERVER2_IP=$2
+SERVER3_IP=$3
+SERVER1_IP_PUBLIC_CIDR=$4
+SERVER2_IP_PUBLIC_CIDR=$5
+SERVER3_IP_PUBLIC_CIDR=$6
+NIC=$7
 DISK=sda
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
@@ -112,39 +122,39 @@ gluster peer status
 gluster pool list
 GFS_VOLUME="gfs"
 createGFS
-# gluster volume set ${GFS_VOLUME} group my-samba
-# GFS_VOLUME="ctdb"
-# sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
-# sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
-# createGFS
-# cat << EOF > /etc/ctdb/nodes
-# $SERVER1_IP
-# $SERVER2_IP
-# $SERVER3_IP
-# EOF
-# cat << EOF > /etc/ctdb/public_addresses
-# 10.10.1.10/16 eno1
-# 10.10.1.11/16 eno1
-# 10.10.1.12/16 eno1
-# EOF
-# sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
-# echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >> /etc/ctdb/script.options
-# systemctl enable --now ctdb
-# systemctl status ctdb -l --no-pager
-# ctdb status
-# ctdb ip
-# ctdb ping
-# cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
-# cat << EOF >> /etc/samba/smb.conf
-# kernel share modes = no
-# kernel oplocks = no
-# map archive = no
-# map hidden = no
-# map read only = no
-# map system = no
-# store dos attributes = yes
-# EOF
-# systemctl enable --now ctdb
-# systemctl status ctdb -l --no-pager
-# systemctl enable --now samba-ad-dc
-# systemctl status samba-ad-dc -l --no-pager
+gluster volume set ${GFS_VOLUME} group my-samba
+GFS_VOLUME="ctdb"
+sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
+sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
+createGFS
+cat << EOF > /etc/ctdb/nodes
+$SERVER1_IP
+$SERVER2_IP
+$SERVER3_IP
+EOF
+cat << EOF > /etc/ctdb/public_addresses
+$SERVER1_IP_PUBLIC_CIDR $NIC
+$SERVER2_IP_PUBLIC_CIDR $NIC
+$SERVER3_IP_PUBLIC_CIDR $NIC
+EOF
+sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
+echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >> /etc/ctdb/script.options
+systemctl enable --now ctdb
+systemctl status ctdb -l --no-pager
+ctdb status
+ctdb ip
+ctdb ping
+cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
+cat << EOF >> /etc/samba/smb.conf
+kernel share modes = no
+kernel oplocks = no
+map archive = no
+map hidden = no
+map read only = no
+map system = no
+store dos attributes = yes
+EOF
+systemctl enable --now ctdb
+systemctl status ctdb -l --no-pager
+systemctl enable --now samba-ad-dc
+systemctl status samba-ad-dc -l --no-pager

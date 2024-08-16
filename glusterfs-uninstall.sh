@@ -32,7 +32,7 @@ function removeGFS {
     systemctl daemon-reload
     umount -f "/$GFS_VOLUME" 2>/dev/null
     sh -c "echo 'y' | sleep 1 | gluster volume stop $GFS_VOLUME force"
-    gluster volume delete $GFS_VOLUME force
+    sh -c "echo 'y' | sleep 1 | gluster volume delete $GFS_VOLUME"
 }
 GFS_VOLUME="gfs"
 removeGFS
