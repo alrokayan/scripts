@@ -25,7 +25,7 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <disk to wipe>"
     echo "EXAMPLE: $0 sdb"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-        echo "This script will wipe, format, and mount a disk for glusterfs"
+        echo "This script will wipe file system, create xfs file system, and mount a disk at /mnt for glusterfs to use, and install glusterfs-server"
         exit 0
     fi
     exit 1
