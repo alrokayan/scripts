@@ -27,9 +27,10 @@
 # $5 SERVER2 PUBLIC IP WITH CIDR
 # $6 SERVER3 PUBLIC IP WITH CIDR
 # $7 NETWORK INTERFACE CARD
+# $8 Disk (without /dev)
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
-    echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP>"
-    echo "EXAMPLE: $0 192.168.0.2 192.168.0.3 192.168.0.4"
+    echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP> <Server1 Public IP with CIDR> <Server2 Public IP with CIDR> <Server3 Public IP with CIDR> <Network Interface Card> <Disk to wipe>"
+    echo "EXAMPLE: $0 192.168.0.2 192.168.0.3 192.168.0.4 10.10.10.10/24 10.10.10.11/24 10.10.10.12/24 eth0 sdb"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
         echo "This script will install glusterfs"
         exit 0
@@ -40,8 +41,11 @@ function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
     gluster volume create ${GFS_VOLUME} replica 3 arbiter 1 transport tcp \
     "$SERVER1_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
-    "$SERVER2_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1\
+    "$SERVER2_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
     "$SERVER3_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
+    "$SERVER1_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2 \
+    "$SERVER2_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2 \
+    "$SERVER3_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2 \
     force
     gluster volume start ${GFS_VOLUME}
     ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ---- BELOW ----
@@ -50,10 +54,16 @@ function createGFS {
     mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
     mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
     mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+    mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol"
+    mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol"
+    mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol"
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
     mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
     mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
     mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+    mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2"
+    mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2"
+    mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2"
     cd /var/lib/glusterd || exit
     find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
     find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
@@ -101,7 +111,7 @@ SERVER1_IP_PUBLIC_CIDR=$4
 SERVER2_IP_PUBLIC_CIDR=$5
 SERVER3_IP_PUBLIC_CIDR=$6
 NIC=$7
-DISK=sda
+DISK=$8
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
 SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')

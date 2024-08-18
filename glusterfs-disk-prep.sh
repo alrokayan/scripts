@@ -30,10 +30,6 @@ if [ -z "$1" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     fi
     exit 1
 fi
-function diskGFS {
-    mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1"
-    df -h | grep "${GFS_VOLUME}"
-}
 apt update -y
 apt upgrade -y
 apt install xfsprogs -y
@@ -49,9 +45,11 @@ systemctl daemon-reload
 mount -a
 mount | grep "/mnt/gluster_disk_$DISK"
 GFS_VOLUME="gfs"
-diskGFS
+mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1"
+mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2"
 GFS_VOLUME="ctdb"
-diskGFS
+mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1"
+df -h | grep "gluster_disk_$DISK"
 apt install glusterfs-server -y
 systemctl enable --now glusterd
 systemctl status glusterd -l --no-pager
