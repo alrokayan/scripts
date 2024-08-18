@@ -47,7 +47,7 @@ NIC=$7
 DISK=$8
 function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
-    gluster volume create ${GFS_VOLUME} replica 6 arbiter 1 transport tcp \
+    gluster volume create ${GFS_VOLUME} replica 3 \
             "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
             "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
             "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
