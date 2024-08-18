@@ -17,16 +17,16 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-install.sh 192.168.0.2 192.168.0.3 192.168.0.4
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-install.sh 192.168.0.2 192.168.0.3 192.168.0.4 10.10.10.10/24 10.10.10.11/24 10.10.10.12/24 eth0 sdb
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-install.sh | bash -s -- 192.168.0.2 192.168.0.3 192.168.0.4
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-install.sh | bash -s --192.168.0.2 192.168.0.3 192.168.0.4 10.10.10.10/24 10.10.10.11/24 10.10.10.12/24 eth0 sdb
 # $1 Server1 IP
 # $2 Server2 IP
 # $3 Server3 IP
 # $4 SERVER1 PUBLIC IP WITH CIDR
 # $5 SERVER2 PUBLIC IP WITH CIDR
 # $6 SERVER3 PUBLIC IP WITH CIDR
-# $7 NETWORK INTERFACE CARD
+# $7 NETWORK INTERFACE CARD FOR PUBLIC IPs
 # $8 Disk (without /dev)
 if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP> <Server1 Public IP with CIDR> <Server2 Public IP with CIDR> <Server3 Public IP with CIDR> <Network Interface Card> <Disk to wipe>"
