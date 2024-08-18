@@ -37,15 +37,23 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ "$1" = "-h" ] || [ "$1" = "--h
     fi
     exit 1
 fi
+SERVER1_IP=$1
+SERVER2_IP=$2
+SERVER3_IP=$3
+SERVER1_IP_PUBLIC_CIDR=$4
+SERVER2_IP_PUBLIC_CIDR=$5
+SERVER3_IP_PUBLIC_CIDR=$6
+NIC=$7
+DISK=$8
 function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
     gluster volume create ${GFS_VOLUME} replica 3 arbiter 1 transport tcp \
-            "$SERVER1_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
-            "$SERVER2_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
-            "$SERVER3_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1 \
-            "$SERVER1_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2 \
-            "$SERVER2_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2 \
-            "$SERVER3_IP":/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2 \
+            "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+            "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+            "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+            "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2" \
+            "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2" \
+            "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2" \
             force
     gluster volume start ${GFS_VOLUME}
     ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ---- BELOW ----
@@ -104,14 +112,6 @@ cluster.metadata-self-heal=on
 cluster.entry-self-heal=on
 cluster.force-migration=disable
 EOF
-SERVER1_IP=$1
-SERVER2_IP=$2
-SERVER3_IP=$3
-SERVER1_IP_PUBLIC_CIDR=$4
-SERVER2_IP_PUBLIC_CIDR=$5
-SERVER3_IP_PUBLIC_CIDR=$6
-NIC=$7
-DISK=$8
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
 SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
