@@ -43,6 +43,7 @@ systemctl stop glusterd
 sed -i '/glusterfs/d' /etc/fstab
 sed -i '/mnt\/gluster_disk/d' /etc/fstab
 umount -f "/mnt/gluster_disk_*"
+rmdir /mnt/gluster_disk_*
 apt update -y
 apt upgrade -y
 apt remove --purge glusterfs-client glusterfs-server ctdb samba samba-* -y
