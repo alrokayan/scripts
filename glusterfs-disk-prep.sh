@@ -46,7 +46,6 @@ mount -a
 mount | grep "/mnt/gluster_disk_$DISK"
 GFS_VOLUME="gfs"
 mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1"
-mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2"
 GFS_VOLUME="ctdb"
 mkdir "/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1"
 df -h | grep "gluster_disk_$DISK"

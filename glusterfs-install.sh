@@ -47,13 +47,10 @@ NIC=$7
 DISK=$8
 function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
-    gluster volume create ${GFS_VOLUME} replica 3 arbiter 1 transport tcp \
+    gluster volume create ${GFS_VOLUME} replica 6 arbiter 1 transport tcp \
             "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
             "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
             "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-            "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2" \
-            "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2" \
-            "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick2" \
             force
     gluster volume start ${GFS_VOLUME}
     ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ---- BELOW ----
@@ -62,16 +59,10 @@ function createGFS {
     mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
     mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
     mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol"
-    mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol"
-    mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2.vol"
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
     mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
     mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
     mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2"
-    mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2"
-    mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick2"
     cd /var/lib/glusterd || exit
     find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
     find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
