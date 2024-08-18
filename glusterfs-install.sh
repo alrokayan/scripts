@@ -161,4 +161,5 @@ EOF
 systemctl enable --now ctdb
 systemctl status ctdb -l --no-pager
 systemctl enable --now samba-ad-dc
+systemctl start samba-ad-dc
 systemctl status samba-ad-dc -l --no-pager
