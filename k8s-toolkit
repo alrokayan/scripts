@@ -758,7 +758,7 @@ echo "-- $HOSTNAME: Initializing k8s master version: $(echo "$K8S_VERSION" | sed
 ALL_IPS=$(hostname -I)
 kubeadm init  --kubernetes-version $(echo "$K8S_VERSION" | sed 's/-[0-9].*//') \
               --apiserver-advertise-address=$MASTER_IP \
-              --apiserver-cert-extra-sans=$(hostname),${ALL_IPS// /,} \
+              --apiserver-cert-extra-sans="${ALL_IPS// /,}$(hostname)" \
               --pod-network-cidr=${CLUSTER_CIDR_FIRST_TWO_OCTETS}.0.0/16
 echo "-- $HOSTNAME: Resetting iptables"
 iptables -F
