@@ -48,6 +48,7 @@ DISK=$8
 function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
     if ! gluster volume info ${GFS_VOLUME} &>/dev/null; then
+        systemctl start glusterd
         echo "Creating and starting ${GFS_VOLUME} volume"
         gluster volume create ${GFS_VOLUME} replica 3 \
                 "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
