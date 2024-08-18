@@ -31,13 +31,15 @@ function removeGFS {
     rm -f /etc/systemd/system/$GFS_VOLUME.mount
     systemctl daemon-reload
     umount -f "/$GFS_VOLUME" 2>/dev/null
-    gluster volume stop $GFS_VOLUME force
-    gluster volume delete $GFS_VOLUME
 }
 GFS_VOLUME="gfs"
 removeGFS
+gluster volume stop $GFS_VOLUME force
+gluster volume delete $GFS_VOLUME
 GFS_VOLUME="ctdb"
 removeGFS
+gluster volume stop $GFS_VOLUME force
+gluster volume delete $GFS_VOLUME
 systemctl disable glusterd
 systemctl stop glusterd
 sed -i '/glusterfs/d' /etc/fstab
