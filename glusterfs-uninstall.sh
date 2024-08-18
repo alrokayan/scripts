@@ -17,9 +17,9 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-uninstall.sh
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && bash -i < glusterfs-uninstall.sh
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-uninstall.sh | bash -s
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-uninstall.sh | bash -i -s
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "This script will uninstall glusterfs"
     exit 1
@@ -31,8 +31,8 @@ function removeGFS {
     rm -f /etc/systemd/system/$GFS_VOLUME.mount
     systemctl daemon-reload
     umount -f "/$GFS_VOLUME" 2>/dev/null
-    sh -c "echo 'y' | sleep 1 | gluster volume stop $GFS_VOLUME force"
-    sh -c "echo 'y' | sleep 1 | gluster volume delete $GFS_VOLUME"
+    gluster volume stop $GFS_VOLUME force
+    gluster volume delete $GFS_VOLUME
 }
 GFS_VOLUME="gfs"
 removeGFS
