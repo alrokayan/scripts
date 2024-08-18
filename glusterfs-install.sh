@@ -48,7 +48,6 @@ DISK=$8
 function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
     if ! gluster volume info ${GFS_VOLUME} &>/dev/null; then
-        systemctl start glusterd
         echo "Creating and starting ${GFS_VOLUME} volume"
         gluster volume create ${GFS_VOLUME} replica 3 \
                 "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
@@ -57,15 +56,16 @@ function createGFS {
                 force
         gluster volume start ${GFS_VOLUME}
     fi
-    systemctl stop glusterd
-    cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
-    mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
-    mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+    # systemctl stop glusterd
+    # cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
+    # mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+    # mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+    # mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+    # cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
+    # mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+    # mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+    # mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+    # systemctl stop glusterd
 }
 apt update -y
 apt upgrade -y
@@ -106,6 +106,7 @@ if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; t
     echo "/etc/hosts does not contain the following IPs: $SERVER1_IP $SERVER2_IP $SERVER3_IP"
     exit 1
 fi
+systemctl enable --now glusterd
 gluster peer probe "$SERVER1_IP"
 gluster peer probe "$SERVER2_IP"
 gluster peer probe "$SERVER3_IP"
@@ -118,16 +119,16 @@ GFS_VOLUME="ctdb"
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
 createGFS
-cd /var/lib/glusterd || exit
-find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
-find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
-find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
-grep -rnw . -e "$SERVER1_IP"
-grep -rnw . -e "$SERVER2_IP"
-grep -rnw . -e "$SERVER3_IP"
-systemctl enable --now glusterd
+# systemctl stop glusterd
+# cd /var/lib/glusterd || exit
+# find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
+# find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
+# find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
+# grep -rnw . -e "$SERVER1_IP"
+# grep -rnw . -e "$SERVER2_IP"
+# grep -rnw . -e "$SERVER3_IP"
+# systemctl start glusterd
 systemctl status glusterd -l --no-pager
-gluster peer status
 gluster volume status
 gluster volume info
 cat << EOF > /etc/ctdb/nodes
