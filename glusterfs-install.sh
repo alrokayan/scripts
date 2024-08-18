@@ -47,13 +47,15 @@ NIC=$7
 DISK=$8
 function createGFS {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
-    gluster volume create ${GFS_VOLUME} replica 3 \
-            "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-            "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-            "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-            force
-    gluster volume start ${GFS_VOLUME}
-    ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ---- BELOW ----
+    if ! gluster volume info ${GFS_VOLUME} &>/dev/null; then
+        echo "Creating and starting ${GFS_VOLUME} volume"
+        gluster volume create ${GFS_VOLUME} replica 3 \
+                "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+                "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+                "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+                force
+        gluster volume start ${GFS_VOLUME}
+    fi
     systemctl stop glusterd
     cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
     mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
@@ -70,7 +72,6 @@ function createGFS {
     grep -rnw . -e "$SERVER1_IP"
     grep -rnw . -e "$SERVER2_IP"
     grep -rnw . -e "$SERVER3_IP"
-    ## ALL NODES MUST DO THE SAME BGEFORE CONTINUE ------ ABOVE ------
     systemctl enable --now glusterd
     systemctl status glusterd -l --no-pager
     gluster peer status
