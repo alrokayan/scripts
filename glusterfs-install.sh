@@ -65,18 +65,6 @@ function createGFS {
     mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
     mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
     mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    cd /var/lib/glusterd || exit
-    find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
-    find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
-    find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
-    grep -rnw . -e "$SERVER1_IP"
-    grep -rnw . -e "$SERVER2_IP"
-    grep -rnw . -e "$SERVER3_IP"
-    systemctl enable --now glusterd
-    systemctl status glusterd -l --no-pager
-    gluster peer status
-    gluster volume status
-    gluster volume info
 }
 apt update -y
 apt upgrade -y
@@ -129,6 +117,18 @@ GFS_VOLUME="ctdb"
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
 createGFS
+cd /var/lib/glusterd || exit
+find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
+find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
+find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
+grep -rnw . -e "$SERVER1_IP"
+grep -rnw . -e "$SERVER2_IP"
+grep -rnw . -e "$SERVER3_IP"
+systemctl enable --now glusterd
+systemctl status glusterd -l --no-pager
+gluster peer status
+gluster volume status
+gluster volume info
 cat << EOF > /etc/ctdb/nodes
 $SERVER1_IP
 $SERVER2_IP
