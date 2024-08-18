@@ -891,6 +891,21 @@ echo "-- $HOSTNAME: Downloading CNI binaries cni-plugins-linux-$( [ $(uname -m) 
 mkdir -p /opt/cni/bin
 curl -s -L "https://github.com/containernetworking/plugins/releases/download/v1.5.0/cni-plugins-linux-$( [ $(uname -m) = aarch64 ] && echo arm64 || echo amd64)"-v1.5.0.tgz | tar xzf - -C /opt/cni/bin
 chown -R "$(id -un)":"$(id -gn)" /opt/cni
+echo "-- $HOSTNAME: Deleting multus-shim on boot (multus bug fix)"
+cat > "/etc/systemd/system/rm-multus-shim.service" <<EOF
+[Unit]
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/rm -f /opt/cni/bin/multus-shim
+
+[Install]
+WantedBy=default.target
+EOF
+chmod 664 /etc/systemd/system/rm-multus-shim.service
+systemctl daemon-reload
+systemctl enable "rm-multus-shim"
+systemctl status "rm-multus-shim" -l --no-pager
 ____EOF____
       i=$((i + 1))
     done
