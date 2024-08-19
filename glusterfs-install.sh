@@ -65,21 +65,7 @@ function createGFS() {
             force
         gluster volume start ${GFS_VOLUME}
     fi
-    # systemctl stop glusterd
-    # cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
-    # mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    # mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    # mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
-    # cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
-    # mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    # mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    # mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
-    # systemctl stop glusterd
 }
-apt update -y
-apt upgrade -y
-apt install samba -y
-apt install ctdb -y
 cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
 AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
 sed -i "/\[global\]/c $AddGlobalSMB" /etc/samba/smb.conf
@@ -108,31 +94,8 @@ user.cifs=enable
 network.inode-lru-limit=200000
 storage.batch-fsync-delay-usec=0
 EOF
-systemctl enable --now glusterd
-gluster peer probe "$SERVER1_IP"
-gluster peer probe "$SERVER2_IP"
-gluster peer probe "$SERVER3_IP"
-gluster peer status
-gluster pool list
-GFS_VOLUME="gfs"
-createGFS
-gluster volume set ${GFS_VOLUME} group my-samba
-GFS_VOLUME="ctdb"
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
-createGFS
-# systemctl stop glusterd
-# cd /var/lib/glusterd || exit
-# find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
-# find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
-# find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
-# grep -rnw . -e "$SERVER1_IP"
-# grep -rnw . -e "$SERVER2_IP"
-# grep -rnw . -e "$SERVER3_IP"
-# systemctl start glusterd
-systemctl status glusterd -l --no-pager
-gluster volume status
-gluster volume info
 cat <<EOF >/etc/ctdb/nodes
 $SERVER1_IP
 $SERVER2_IP
@@ -143,24 +106,73 @@ $SERVER_IP_PUBLIC_CIDR $NIC
 EOF
 sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
 echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
+gluster peer probe "$SERVER1_IP"
+gluster peer probe "$SERVER2_IP"
+gluster peer probe "$SERVER3_IP"
+gluster peer status
+gluster pool list
+
+GFS_VOLUME="ctdb" && createGFS
+GFS_VOLUME="gfs" && createGFS && gluster volume set ${GFS_VOLUME} group my-samba
+gluster volume status
+gluster volume info
+
+apt update -y
+apt upgrade -y
+apt install ctdb -y
 systemctl enable --now ctdb
 systemctl status ctdb -l --no-pager
 ctdb status
 ctdb ip
 ctdb ping
 df -h /gluster/lock
+
+apt update -y
+apt upgrade -y
+apt install samba -y
+systemctl enable --now smbd
+systemctl status smbd -l --no-pager
 ./scripts/glusterfs-client.sh
+df -h /gfs
 mkdir /gfs/smbshare
 groupadd smbgroup
 chgrp smbgroup /gfs/smbshare
 usermod -aG smbgroup root
 chmod 770 /gfs/smbshare
-umount /gfs
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
 sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.conf
 grep gluster-gfs /etc/samba/smb.conf
 systemctl restart smbd
 systemctl status smbd -l --no-pager
 ufw allow samba
+apt install smbclient cifs-utils -y
 smbclient -L "$SERVER_IP_PUBLIC_CIDR" -U%
 smbclient "//$SERVER_IP_PUBLIC_CIDR/gluster-gfs" -U root%M@jed2030
+
+
+
+
+
+
+
+
+
+
+
+# systemctl stop glusterd
+# cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
+# mv "${GFS_VOLUME}.$SERVER1_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER1_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+# mv "${GFS_VOLUME}.$SERVER2_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER2_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+# mv "${GFS_VOLUME}.$SERVER3_IP.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol" "${GFS_VOLUME}.$SERVER3_NAME.mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1.vol"
+# cd /var/lib/glusterd/vols/${GFS_VOLUME}/bricks || exit
+# mv "$SERVER1_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER1_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+# mv "$SERVER2_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER2_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+# mv "$SERVER3_IP:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1" "$SERVER3_NAME:-mnt-gluster_disk_$DISK-${GFS_VOLUME}_brick1"
+# cd /var/lib/glusterd || exit
+# find . -type f -exec sed -i "s/$SERVER1_IP/$SERVER1_NAME/g" {} \;
+# find . -type f -exec sed -i "s/$SERVER2_IP/$SERVER2_NAME/g" {} \;
+# find . -type f -exec sed -i "s/$SERVER3_IP/$SERVER3_NAME/g" {} \;
+# grep -rnw . -e "$SERVER1_IP"
+# grep -rnw . -e "$SERVER2_IP"
+# grep -rnw . -e "$SERVER3_IP"
+# systemctl start glusterd

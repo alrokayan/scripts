@@ -34,8 +34,6 @@ function removeGFS {
 }
 GFS_VOLUME="gfs"
 removeGFS
-gluster volume stop $GFS_VOLUME force
-gluster volume delete $GFS_VOLUME
 GFS_VOLUME="ctdb"
 removeGFS
 gluster volume stop $GFS_VOLUME force
