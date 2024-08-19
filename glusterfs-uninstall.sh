@@ -57,3 +57,4 @@ rm -rf /var/lib/samba
 rm -rf /etc/glusterfs
 rm -rf /etc/ctdb
 rm -rf /etc/samba
+delgroup smbgroup
