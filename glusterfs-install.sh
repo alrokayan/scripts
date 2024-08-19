@@ -68,7 +68,7 @@ function createGFS() {
 }
 cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
 AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
-sed -i "/\[global\]/c $AddGlobalSMB" /etc/samba/smb.conf
+sed -i "/\[global\]/c\ $AddGlobalSMB" /etc/samba/smb.conf
 cat <<EOF >/var/lib/glusterd/groups/my-samba
 cluster.self-heal-daemon=enable
 cluster.data-self-heal=on
@@ -141,6 +141,7 @@ usermod -aG smbgroup root
 chmod 770 /gfs/smbshare
 umount /gfs
 
+grep gluster /etc/samba/smb.conf
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
 sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.conf
 grep gluster /etc/samba/smb.conf
