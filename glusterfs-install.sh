@@ -64,6 +64,7 @@ function createGFS() {
             "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
             force
         gluster volume start ${GFS_VOLUME}
+        gluster volume set ${GFS_VOLUME} group my-samba
     fi
 }
 cat <<EOF >/var/lib/glusterd/groups/my-samba
@@ -100,7 +101,7 @@ gluster peer status
 gluster pool list
 
 GFS_VOLUME="ctdb" && createGFS
-GFS_VOLUME="gfs" && createGFS && gluster volume set ${GFS_VOLUME} group my-samba
+GFS_VOLUME="gfs" && createGFS
 gluster volume status
 gluster volume info
 
@@ -132,17 +133,6 @@ AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n  
 sed -i "/\[global\]/c\ $AddGlobalSMB" /etc/samba/smb.conf
 systemctl enable --now smbd
 systemctl status smbd -l --no-pager
-umount -f /gfs
-rmdir /gfs
-mkdir -p /gfs
-mount -t glusterfs localhost:/gfs /gfs
-df -h /gfs
-mkdir /gfs/smbshare
-groupadd smbgroup
-chgrp smbgroup /gfs/smbshare
-usermod -aG smbgroup root
-chmod 770 /gfs/smbshare
-umount -f /gfs
 
 grep gluster /etc/samba/smb.conf
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
@@ -164,6 +154,20 @@ smbclient "//$SERVER_IP_PUBLIC_CIDR/gluster-gfs" -U root%M@jed2030
 
 
 
+
+
+
+# umount -f /gfs
+# rmdir /gfs
+# mkdir -p /gfs
+# mount -t glusterfs localhost:/gfs /gfs
+# df -h /gfs
+# mkdir /gfs/smbshare
+# groupadd smbgroup
+# chgrp smbgroup /gfs/smbshare
+# usermod -aG smbgroup root
+# chmod 770 /gfs/smbshare
+# umount -f /gfs
 
 # systemctl stop glusterd
 # cd /var/lib/glusterd/vols/${GFS_VOLUME}/ || exit
