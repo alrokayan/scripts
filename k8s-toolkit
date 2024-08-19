@@ -445,9 +445,10 @@ fi
 echo "-- $HOSTNAME: Upgrading kubelet configuration"
 if kubeadm upgrade node phase kubelet-config --patches /var/lib/kubelet/kubeletconfigurationpatches/; then
   echo "-- $HOSTNAME: Recreating kubelet-config ConfigMap with new configurations"
-  cp /var/lib/kubelet/config.yaml /tmp/kubelet
+  mkdir -p $HOME/.config/kubelet
+  cp /var/lib/kubelet/config.yaml $HOME/.config/kubelet/kubelet
   kubectl delete configmap -n kube-system kubelet-config
-  kubectl create configmap -n kube-system kubelet-config --from-file=/tmp/kubelet
+  kubectl create configmap -n kube-system kubelet-config --from-file=$HOME/.config/kubelet/kubelet
   systemctl daemon-reload && systemctl restart kubelet && systemctl restart containerd
 fi
 ____EOF____
