@@ -41,6 +41,12 @@ SERVER3_IP=$3
 SERVER_IP_PUBLIC_CIDR=$4
 NIC=$5
 DISK=$6
+SERVER1_IP=10.0.0.10
+SERVER2_IP=10.0.0.11
+SERVER3_IP=10.0.0.12
+SERVER_IP_PUBLIC_CIDR=10.10.10.10/16
+NIC=eno1
+DISK=sda
 SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
 SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
 SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
@@ -115,6 +121,7 @@ $SERVER3_IP
 EOF
 cat <<EOF >/etc/ctdb/public_addresses
 $SERVER_IP_PUBLIC_CIDR $NIC
+10.0.0.100/24 vlan10
 EOF
 sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
 echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
@@ -124,23 +131,30 @@ ctdb status
 ctdb ip
 ctdb ping
 df -h /gluster/lock
+AddCTDB='[cluster]\n        CTDB_SET_DeterministicIPs=1'
+sed -i "/\[cluster\]/c $AddCTDB" /etc/ctdb/ctdb.conf
+systemctl restart ctdb
+systemctl status ctdb -l --no-pager
+ip a | grep $SERVER_IP_PUBLIC_CIDR
 
 apt update -y
 apt upgrade -y
 apt install samba -y
 cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
+grep gluster /etc/samba/smb.conf
+
 AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
 sed -i "/\[global\]/c\ $AddGlobalSMB" /etc/samba/smb.conf
-systemctl enable --now smbd
-systemctl status smbd -l --no-pager
-
-grep gluster /etc/samba/smb.conf
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
 sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.conf
-grep gluster /etc/samba/smb.conf
 systemctl restart smbd
 systemctl status smbd -l --no-pager
+systemctl restart glusterd
+systemctl status glusterd -l --no-pager
+systemctl restart ctdb
+systemctl status ctdb -l --no-pager
 ufw allow samba
+
 apt install smbclient cifs-utils -y
 smbclient -L "$SERVER_IP_PUBLIC_CIDR" -U%
 smbclient "//$SERVER_IP_PUBLIC_CIDR/gluster-gfs" -U root%M@jed2030
