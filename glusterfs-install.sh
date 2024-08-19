@@ -6,9 +6,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-#  
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -41,15 +41,28 @@ SERVER3_IP=$3
 SERVER_IP_PUBLIC_CIDR=$4
 NIC=$5
 DISK=$6
-function createGFS {
+SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
+SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
+SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
+echo "SERVER1_NAME: $SERVER1_NAME"
+echo "SERVER1_IP: $SERVER1_IP"
+echo "SERVER2_NAME: $SERVER2_NAME"
+echo "SERVER2_IP: $SERVER2_IP"
+echo "SERVER3_NAME: $SERVER3_NAME"
+echo "SERVER3_IP: $SERVER3_IP"
+if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; then
+    echo "/etc/hosts does not contain the following IPs: $SERVER1_IP $SERVER2_IP $SERVER3_IP"
+    exit 1
+fi
+function createGFS() {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
     if ! gluster volume info ${GFS_VOLUME} &>/dev/null; then
         echo "Creating and starting ${GFS_VOLUME} volume"
         gluster volume create ${GFS_VOLUME} replica 3 \
-                "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-                "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-                "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
-                force
+            "$SERVER1_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+            "$SERVER2_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+            "$SERVER3_IP:/mnt/gluster_disk_$DISK/${GFS_VOLUME}_brick1" \
+            force
         gluster volume start ${GFS_VOLUME}
     fi
     # systemctl stop glusterd
@@ -67,7 +80,10 @@ apt update -y
 apt upgrade -y
 apt install samba -y
 apt install ctdb -y
-cat << EOF > /var/lib/glusterd/groups/my-samba
+cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
+AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
+sed -i "/\[global\]/c $AddGlobalSMB" /etc/samba/smb.conf
+cat <<EOF >/var/lib/glusterd/groups/my-samba
 cluster.self-heal-daemon=enable
 cluster.data-self-heal=on
 cluster.metadata-self-heal=on
@@ -88,22 +104,10 @@ server.event-threads=4
 client.event-threads=4
 nfs.disable=on
 user.smb=enable
+user.cifs=enable
 network.inode-lru-limit=200000
 storage.batch-fsync-delay-usec=0
 EOF
-SERVER1_NAME=$(grep "$SERVER1_IP" /etc/hosts | awk '{print $2}')
-SERVER2_NAME=$(grep "$SERVER2_IP" /etc/hosts | awk '{print $2}')
-SERVER3_NAME=$(grep "$SERVER3_IP" /etc/hosts | awk '{print $2}')
-echo "SERVER1_NAME: $SERVER1_NAME"
-echo "SERVER1_IP: $SERVER1_IP"
-echo "SERVER2_NAME: $SERVER2_NAME"
-echo "SERVER2_IP: $SERVER2_IP"
-echo "SERVER3_NAME: $SERVER3_NAME"
-echo "SERVER3_IP: $SERVER3_IP"
-if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; then
-    echo "/etc/hosts does not contain the following IPs: $SERVER1_IP $SERVER2_IP $SERVER3_IP"
-    exit 1
-fi
 systemctl enable --now glusterd
 gluster peer probe "$SERVER1_IP"
 gluster peer probe "$SERVER2_IP"
@@ -129,16 +133,16 @@ createGFS
 systemctl status glusterd -l --no-pager
 gluster volume status
 gluster volume info
-cat << EOF > /etc/ctdb/nodes
+cat <<EOF >/etc/ctdb/nodes
 $SERVER1_IP
 $SERVER2_IP
 $SERVER3_IP
 EOF
-cat << EOF > /etc/ctdb/public_addresses
+cat <<EOF >/etc/ctdb/public_addresses
 $SERVER_IP_PUBLIC_CIDR $NIC
 EOF
 sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
-echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >> /etc/ctdb/script.options
+echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
 systemctl enable --now ctdb
 systemctl status ctdb -l --no-pager
 ctdb status
@@ -152,11 +156,11 @@ chgrp smbgroup /gfs/smbshare
 usermod -aG smbgroup root
 chmod 770 /gfs/smbshare
 umount /gfs
-cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
-AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes'
-sed -i "/\[global\]/c $AddGlobalSMB" /etc/samba/smb.conf
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
 sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.conf
+grep gluster-gfs /etc/samba/smb.conf
 systemctl restart smbd
 systemctl status smbd -l --no-pager
 ufw allow samba
+smbclient -L "$SERVER_IP_PUBLIC_CIDR" -U%
+smbclient "//$SERVER_IP_PUBLIC_CIDR/gluster-gfs" -U root%M@jed2030
