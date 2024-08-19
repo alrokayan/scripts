@@ -29,37 +29,34 @@ umount /gfs -f 2>/dev/null
 rm -rf /gfs
 mkdir /gfs
 echo "-- Mounting /gfs"
-sed -i '/glusterfs/d' /etc/fstab
-echo 'localhost:/gfs /gfs glusterfs defaults,_netdev 0 0' >> /etc/fstab
-mount -a
-# systemctl stop "gfs.mount"
-# cat >"/etc/systemd/system/gfs.mount" <<EOF
-# [Unit]
-# Description=Mounting /gfs
-# Requires=network-online.target
-# After=glusterd.service
-# #
-# # Replaces this line in fstab
-# #localhost:gfs /gfs glusterfs defaults,_netdev 0 0
-# #
-# [Mount]
-# RemainAfterExit=true
-# ExecStartPre=/usr/sbin/gluster volume list
-# ExecStart=/bin/mount -a -t glusterfs
-# Restart=always
-# RestartSec=3
-# TimeoutSec=10s
-# What=localhost:gfs
-# Where=/gfs
-# Type=glusterfs
-# Options=defaults,_netdev
+# sed -i '/glusterfs/d' /etc/fstab
+# echo 'localhost:/gfs /gfs glusterfs defaults,_netdev 0 0' >> /etc/fstab
+# mount -a
+cat >"/etc/systemd/system/gfs.mount" <<EOF
+[Unit]
+Description=Mounting /gfs
+Requires=network-online.target
+After=glusterd.service
+Wants=glusterd.service
 
-# [Install]
-# WantedBy=multi-user.target
-# EOF
-# touch /etc/systemd/system/gfs.automount
-# systemctl daemon-reload
-# systemctl enable --now "gfs.mount"
-# systemctl status "gfs.mount" -l --no-pager
-# ls -al /gfs
-# df -h | grep gfs
+[Mount]
+RemainAfterExit=true
+ExecStartPre=/usr/sbin/gluster volume list
+ExecStart=/bin/mount -a -t glusterfs
+Restart=always
+RestartSec=3
+TimeoutSec=10s
+What=localhost:gfs
+Where=/gfs
+Type=glusterfs
+Options=defaults,_netdev
+
+[Install]
+WantedBy=multi-user.target
+EOF
+touch /etc/systemd/system/gfs.automount
+systemctl daemon-reload
+systemctl enable --now "gfs.mount"
+systemctl status "gfs.mount" -l --no-pager
+ls -al /gfs
+df -h | grep gfs
