@@ -55,8 +55,30 @@ Options=defaults,_netdev
 WantedBy=multi-user.target
 EOF
 touch /etc/systemd/system/gfs.automount
+cat <<'EOF' >/etc/systemd/system/gfs-mount-watchtower
+#!/bin/bash
+while ! systemctl status "gfs.mount" -l --no-pager &>/dev/null; do
+  systemctl restart "gfs.mount"
+  sleep 10s
+done
+EOF
+chmod +x /etc/systemd/system/gfs-mount-watchtower
+cat <<EOF >/lib/systemd/system/gfs-mount-watchtower.service
+[Unit]
+Description=gfs-mount-watchtower
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/etc/systemd/system/gfs-mount-watchtower
+
+[Install]
+WantedBy=multi-user.target
+EOF
 systemctl daemon-reload
 systemctl enable --now "gfs.mount"
 systemctl status "gfs.mount" -l --no-pager
+systemctl enable --now gfs-mount-watchtower
+systemctl status "gfs-mount-watchtower" -l --no-pager
 ls -al /gfs
 df -h | grep gfs
