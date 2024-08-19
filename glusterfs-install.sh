@@ -132,16 +132,18 @@ apt upgrade -y
 apt install samba -y
 systemctl enable --now smbd
 systemctl status smbd -l --no-pager
-./scripts/glusterfs-client.sh
+mount -t glusterfs localhost:/gfs /gfs
 df -h /gfs
 mkdir /gfs/smbshare
 groupadd smbgroup
 chgrp smbgroup /gfs/smbshare
 usermod -aG smbgroup root
 chmod 770 /gfs/smbshare
+umount /gfs
+
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
 sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.conf
-grep gluster-gfs /etc/samba/smb.conf
+grep gluster /etc/samba/smb.conf
 systemctl restart smbd
 systemctl status smbd -l --no-pager
 ufw allow samba
