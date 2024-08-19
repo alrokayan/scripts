@@ -66,9 +66,6 @@ function createGFS() {
         gluster volume start ${GFS_VOLUME}
     fi
 }
-cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
-AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
-sed -i "/\[global\]/c\ $AddGlobalSMB" /etc/samba/smb.conf
 cat <<EOF >/var/lib/glusterd/groups/my-samba
 cluster.self-heal-daemon=enable
 cluster.data-self-heal=on
@@ -96,16 +93,6 @@ storage.batch-fsync-delay-usec=0
 EOF
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
-cat <<EOF >/etc/ctdb/nodes
-$SERVER1_IP
-$SERVER2_IP
-$SERVER3_IP
-EOF
-cat <<EOF >/etc/ctdb/public_addresses
-$SERVER_IP_PUBLIC_CIDR $NIC
-EOF
-sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
-echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
 gluster peer probe "$SERVER1_IP"
 gluster peer probe "$SERVER2_IP"
 gluster peer probe "$SERVER3_IP"
@@ -120,6 +107,16 @@ gluster volume info
 apt update -y
 apt upgrade -y
 apt install ctdb -y
+cat <<EOF >/etc/ctdb/nodes
+$SERVER1_IP
+$SERVER2_IP
+$SERVER3_IP
+EOF
+cat <<EOF >/etc/ctdb/public_addresses
+$SERVER_IP_PUBLIC_CIDR $NIC
+EOF
+sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
+echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
 systemctl enable --now ctdb
 systemctl status ctdb -l --no-pager
 ctdb status
@@ -130,6 +127,9 @@ df -h /gluster/lock
 apt update -y
 apt upgrade -y
 apt install samba -y
+cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
+AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
+sed -i "/\[global\]/c\ $AddGlobalSMB" /etc/samba/smb.conf
 systemctl enable --now smbd
 systemctl status smbd -l --no-pager
 mount -t glusterfs localhost:/gfs /gfs
