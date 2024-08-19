@@ -29,6 +29,7 @@ umount /gfs -f 2>/dev/null
 rm -rf /gfs
 mkdir /gfs
 echo "-- Mounting /gfs"
+systemctl stop "gfs.mount"
 cat >"/etc/systemd/system/gfs.mount" <<EOF
 [Unit]
 Description=Mounting /gfs
@@ -44,6 +45,7 @@ ExecStartPre=/usr/sbin/gluster volume list
 ExecStart=/bin/mount -a -t glusterfs
 Restart=always
 RestartSec=3
+TimeoutSec=10s
 What=localhost:gfs
 Where=/gfs
 Type=glusterfs
@@ -52,6 +54,7 @@ Options=defaults,_netdev
 [Install]
 WantedBy=multi-user.target
 EOF
+touch /etc/systemd/system/gfs.automount
 systemctl daemon-reload
 systemctl enable --now "gfs.mount"
 systemctl status "gfs.mount" -l --no-pager
