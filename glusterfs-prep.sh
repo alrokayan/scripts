@@ -99,7 +99,6 @@ EOF
 cat <<EOF >/etc/ctdb/public_addresses
 $SERVER_IP_PUBLIC_CIDR $NIC
 10.0.0.100/24 vlan10
-10.10.10.10/16 eno1
 EOF
 sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
 echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
