@@ -17,16 +17,14 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-install.sh 192.168.0.2 192.168.0.3 192.168.0.4 10.10.10.10/24 eth0 sdb
+# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-install.sh 192.168.0.2 192.168.0.3 192.168.0.4 sdb
 # OR
-# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-install.sh | bash -s --192.168.0.2 192.168.0.3 192.168.0.4 10.10.10.10/24 eth0 sdb
+# curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-install.sh | bash -s --192.168.0.2 192.168.0.3 192.168.0.4 sdb
 # $1 Server1 IP
 # $2 Server2 IP
 # $3 Server3 IP
-# $4 SERVER PUBLIC IP WITH CIDR
-# $5 NETWORK INTERFACE CARD FOR PUBLIC IPs
-# $6 Disk (without /dev)
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ -z "$5" ] || [ -z "$6" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
+# $4 Disk (without /dev)
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <Server1 IP> <Server2 IP> <Server3 IP> <Server Public IP with CIDR> <Network Interface Card> <Disk to wipe>"
     echo "EXAMPLE: $0 192.168.0.2 192.168.0.3 192.168.0.4 10.10.10.10/24 eth0 sdb"
     if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
@@ -38,7 +36,7 @@ fi
 SERVER1_IP=$1
 SERVER2_IP=$2
 SERVER3_IP=$3
-DISK=$6
+DISK=$4
 function createGFS() {
     echo "GFS_VOLUME: ${GFS_VOLUME}"
     if ! gluster volume info ${GFS_VOLUME} &>/dev/null; then
