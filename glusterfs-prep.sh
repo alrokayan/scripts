@@ -136,13 +136,13 @@ sed -i'' 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CT
 sed -i'' 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
 ## Enable ans Start
 echo "pusing for 5 seconds" && sleep 5s
-systemctl enable smbd
-systemctl restart smbd
-systemctl status smbd -l --no-pager
-echo "pusing for 5 seconds" && sleep 5s
 systemctl enable ctdb
 systemctl restart ctdb
 systemctl status ctdb -l --no-pager
+echo "pusing for 5 seconds" && sleep 5s
+systemctl enable smbd
+systemctl restart smbd
+systemctl status smbd -l --no-pager
 echo "pusing for 5 seconds" && sleep 5s
 systemctl enable glusterd
 systemctl restart glusterd
@@ -160,6 +160,6 @@ ctdb status
 ctdb ip
 ctdb ping
 echo "----- TESTING5 CTDB -----"
-systemctl status smbd -l --no-pager
 systemctl status ctdb -l --no-pager
+systemctl status smbd -l --no-pager
 systemctl status glusterd -l --no-pager

@@ -58,17 +58,12 @@ gluster peer probe "$SERVER3_IP"
 gluster peer status && gluster pool list
 GFS_VOLUME="ctdb" && createGFS
 GFS_VOLUME="gfs" && createGFS
-systemctl restart smbd
 systemctl restart ctdb
+systemctl restart smbd
 systemctl restart glusterd
-systemctl status smbd -l --no-pager
 systemctl status ctdb -l --no-pager
+systemctl status smbd -l --no-pager
 systemctl status glusterd -l --no-pager
-
-
-
-
-
 
 
 
