@@ -34,6 +34,7 @@ function removeGFS {
 }
 GFS_VOLUME="gfs"
 removeGFS
+rmdir /gfs
 GFS_VOLUME="ctdb"
 removeGFS
 gluster volume stop $GFS_VOLUME force
