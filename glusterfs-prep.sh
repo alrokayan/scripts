@@ -54,12 +54,12 @@ if [ -z "$SERVER1_NAME" ] || [ -z "$SERVER2_NAME" ] || [ -z "$SERVER3_NAME" ]; t
     exit 1
 fi
 ## TESTING VALUES
-SERVER1_IP=10.0.0.10
-SERVER2_IP=10.0.0.11
-SERVER3_IP=10.0.0.12
-SERVER_IP_PUBLIC_CIDR=10.10.10.10/16
-NIC=eno1
-DISK=sda
+# SERVER1_IP=10.0.0.10
+# SERVER2_IP=10.0.0.11
+# SERVER3_IP=10.0.0.12
+# SERVER_IP_PUBLIC_CIDR=10.10.10.10/16
+# NIC=eno1
+# DISK=sda
 ## Disk Prep
 umount "/dev/$DISK" -f
 sh -c "echo 'w' | sleep 1 | fdisk /dev/$DISK -w always -W always"
@@ -82,10 +82,10 @@ apt upgrade -y
 apt install xfsprogs glusterfs-server glusterfs-client samba ctdb smbclient cifs-utils -y
 ## SAMBA Files Prep
 cp /etc/samba/smb.conf /etc/samba/smb.conf.ORIGINAL
-AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering=yes'
+AddGlobalSMB='[global]\n    kernel share modes = no\n    kernel oplocks = no\n    map archive = no\n    map hidden = no\n    map read only = no\n    map system = no\n    store dos attributes = yes\n    clustering = yes'
 sed -i "/\[global\]/c\ $AddGlobalSMB" /etc/samba/smb.conf
 AddGFSSMB='[gluster-gfs]\n    writable = yes\n    valid users = @smbgroup\n    force create mode = 777\n    force directory mode = 777\n    inherit permissions = yes'
-sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.con
+sed -i "/\[gluster-gfs\]/c $AddGFSSMB" /etc/samba/smb.conf
 ## CTDB Files Preps
 cp /etc/ctdb/nodes /etc/ctdb/nodes.ORIGINAL
 cp /etc/ctdb/public_addresses /etc/ctdb/public_addresses.ORIGINAL
@@ -98,7 +98,6 @@ $SERVER3_IP
 EOF
 cat <<EOF >/etc/ctdb/public_addresses
 $SERVER_IP_PUBLIC_CIDR $NIC
-10.0.0.100/24 vlan10
 EOF
 sed -i '/CTDB_SAMBA_SKIP_SHARE_CHECK/d' /etc/ctdb/script.options
 echo 'CTDB_SAMBA_SKIP_SHARE_CHECK=yes' >>/etc/ctdb/script.options
@@ -136,21 +135,31 @@ EOF
 sed -i'' 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/start/post/S29CTDBsetup.sh
 sed -i'' 's/META="all"/META="ctdb"/g' /var/lib/glusterd/hooks/1/stop/pre/S29CTDB-teardown.sh
 ## Enable ans Start
+echo "pusing for 5 seconds" && sleep 5s
 systemctl enable smbd
 systemctl restart smbd
 systemctl status smbd -l --no-pager
+echo "pusing for 5 seconds" && sleep 5s
 systemctl enable ctdb
 systemctl restart ctdb
 systemctl status ctdb -l --no-pager
+echo "pusing for 5 seconds" && sleep 5s
 systemctl enable glusterd
 systemctl restart glusterd
 systemctl status glusterd -l --no-pager
+echo "pusing for 5 seconds" && sleep 5s
 ## Testing
-echo "----- TESTING1 -----"
-ip a | grep $SERVER_IP_PUBLIC_CIDR
-echo "----- TESTING2 -----"
-df -h /gluster/lock
-echo "----- TESTING3 -----"
+echo "----- TESTING3 DISK -----"
+df -h | grep "/mnt/gluster_disk_$DISK"
+echo "----- TESTING1 CTDB -----"
+ip a | grep "$SERVER_IP_PUBLIC_CIDR"
+echo "----- TESTING2 CTDB -----"
+df -h | grep /gluster/lock
+echo "----- TESTING4 CTDB -----"
 ctdb status
 ctdb ip
 ctdb ping
+echo "----- TESTING5 CTDB -----"
+systemctl status smbd -l --no-pager
+systemctl status ctdb -l --no-pager
+systemctl status glusterd -l --no-pager
