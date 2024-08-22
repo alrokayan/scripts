@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-install.sh
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/docker-install.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-install.sh | bash -s
 if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then

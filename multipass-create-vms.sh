@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./multipass-create-vms.sh ubuntu 00:14:51:3C:84:F1 eno0 /Users/USER/Nextcloud /nextcloud 2 2 64
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/multipass-create-vms.sh ubuntu 00:14:51:3C:84:F1 eno0 /Users/USER/Nextcloud /nextcloud 2 2 64
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/multipass-create-vms.sh | bash -s -- ubuntu 00:14:51:3C:84:F1 eno0 /Users/USER/Nextcloud /nextcloud 2 2 64
 # $1 Hostname

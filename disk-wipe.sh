@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-wipe.sh /dev/disk4 exfat
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/disk-wipe.sh /dev/disk4 exfat
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-wipe.sh | bash -s -- /dev/disk4 exfat
 # $1 Path to disk

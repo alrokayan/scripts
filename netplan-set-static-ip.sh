@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./netplan-set-static-ip.sh eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/netplan-set-static-ip.sh eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/netplan-set-static-ip.sh | bash -s -- eth0 10.10.0.99 10.10.0.1 10.10.0.1 1.1.1.1
 # $1 NIC

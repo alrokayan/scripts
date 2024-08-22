@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./glusterfs-create-vol.sh 192.168.0.2 192.168.0.3 192.168.0.4 sdb
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/glusterfs-create-vol.sh 192.168.0.2 192.168.0.3 192.168.0.4 sdb
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/glusterfs-create-vol.sh | bash -s --192.168.0.2 192.168.0.3 192.168.0.4 sdb
 # $1 Server1 IP

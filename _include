@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/
 # OR
 # source <(curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include)
 #######################################
@@ -67,11 +67,11 @@ function readVar {
 function readYesNoVar {
   if [ "$1" == "" ]; then
     echo "-- readYesNoVar ERROR: arg 1 was not found"
-    exit 1
+    return 1
   fi
   if [ "$2" == "" ]; then
     echo "-- readYesNoVar ERROR: arg 2 was not found"
-    exit 1
+    return 1
   fi
   # $1: Variable name
   # $2: Default value
@@ -115,11 +115,11 @@ function readYesNoVar {
 function readArrayVar {
   if [ "$1" == "" ]; then
     echo "-- readArrayVar ERROR: arg 1 was not found"
-    exit 1
+    return 1
   fi
   if [ "$2" == "" ]; then
     echo "-- readArrayVar ERROR: arg 2 was not found"
-    exit 1
+    return 1
   fi
   # $1: Variable name
   # $2: Message
@@ -148,7 +148,7 @@ function readArrayVar {
 function NEXT_IP {
   if [ "$1" == "" ]; then
     echo "-- NEXT_IP ERROR: arg 1 was not found"
-    exit 1
+    return 1
   fi
   IP="$1"
   for ((i = 0; i <= "$2"; i++)); do
@@ -185,7 +185,7 @@ function WAIT_ALL_NODES_ONLINE {
   # $1 Array of servers
   if [ "$1" == "" ]; then
     echo "-- WAIT_ALL_NODES_ONLINE ERROR: arg 1 was not found"
-    exit 1
+    return 1
   fi
   NODE_ARRAY="$1"
   echo "-- Waiting for all nodes to be online"
@@ -238,11 +238,11 @@ function RESTART_ALL_NODES {
   # $2 Private key path
   if [ "$1" == "" ]; then
     echo "-- RESTART_ALL_NODES ERROR: arg 1 was not found"
-    exit 1
+    return 1
   fi
   if [ "$2" == "" ]; then
     echo "-- RESTART_ALL_NODES ERROR: arg 2 was not found"
-    exit 1
+    return 1
   fi
   NODE_ARRAY="$1"
   PRIVATE_KEY="$2"
@@ -268,11 +268,11 @@ function SSH_COPY_ID {
   # $2 Array of servers
   if [ "$1" == "" ]; then
     echo "-- SSH_COPY_ID ERROR: arg 1 was not found"
-    exit 1
+    return 1
   fi
   if [ "$2" == "" ]; then
     echo "-- SSH_COPY_ID ERROR: arg 2 was not found"
-    exit 1
+    return 1
   fi
   PRIVATE_KEY="$1"
   NODE_ARRAY="$2"

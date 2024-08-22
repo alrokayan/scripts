@@ -17,12 +17,12 @@
 # under the License.
 #
 # HOW TO (Mac):
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./pi-enable-ssh.sh
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/pi-enable-ssh.sh
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/pi-enable-ssh.sh | bash -s
 #
 # HOW TO (Linux):
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./pi-enable-ssh.sh /dev/disk4s2
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/pi-enable-ssh.sh /dev/disk4s2
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/pi-enable-ssh.sh | bash -s -- /dev/disk4s2
 # $1 Path to disk (only for Linux)

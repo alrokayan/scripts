@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./backup.tar.gz.sh /mnt/hdd/Backups /mnt/nvme/kube-volumes
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/backup.tar.gz.sh /mnt/hdd/Backups /mnt/nvme/kube-volumes
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/backup.tar.gz.sh | bash -s -- /mnt/hdd/Backups /mnt/nvme/kube-volumes
 # $1 Backup folder path

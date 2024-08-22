@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-create-nfs-volume.sh 10.0.0.1 /mnt/hdd/Nextcloud nextcloud
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/docker-create-nfs-volume.sh 10.0.0.1 /mnt/hdd/Nextcloud nextcloud
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-create-nfs-volume.sh | bash -s -- 10.0.0.1 /mnt/hdd/Nextcloud nextcloud
 # $1 NFS SERVER

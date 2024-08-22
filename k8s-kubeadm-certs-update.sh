@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./k8s-kubeadm-certs-update.sh 10.10.1.10 127.16.0.10 master master.example.com
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/k8s-kubeadm-certs-update.sh 10.10.1.10 127.16.0.10 master master.example.com
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/k8s-kubeadm-certs-update.sh | bash -s -- 10.10.1.10 127.16.0.10 master master.example.com
 # $1 Main IP

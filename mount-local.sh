@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./mount-local.sh exfat /dev/sdX /nextcloud
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/mount-local.sh exfat /dev/sdX /nextcloud
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/mount-local.sh | bash -s -- exfat /dev/sdX /nextcloud
 # $1 = Disk formate

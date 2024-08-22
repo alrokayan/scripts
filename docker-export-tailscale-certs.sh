@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./docker-export-tailscale-certs.sh /docker-volumes/tailscale /certs
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/docker-export-tailscale-certs.sh /docker-volumes/tailscale /certs
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/docker-export-tailscale-certs.sh | bash -s -- /docker-volumes/tailscale /certs
 # $1 Path to tailscale volume

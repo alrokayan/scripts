@@ -17,7 +17,7 @@
 # under the License.
 #
 # HOW TO:
-# rm -r scripts && git clone https://github.com/alrokayan/scripts.git && cd scripts && chmod +x * && ./disk-restore-rootfs.sh /mnt/backup-rootfs/pi-rootfs.fsa /dev/sda
+# rm -rf scripts ; git clone https://github.com/alrokayan/scripts.git && chmod +x scripts/* && ./scripts/disk-restore-rootfs.sh /mnt/backup-rootfs/pi-rootfs.fsa /dev/sda
 # OR
 # curl -fL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/disk-backup-rootfs.sh | bash -s -- /mnt/backup-rootfs/pi-rootfs.fsa /dev/sda
 # $1 Backup file
