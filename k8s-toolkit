@@ -29,17 +29,17 @@ else
   ENV_FILE="$1"
 fi
 mkdir -p tmp
-if ! [ -f tmp/_include ]; then
-  if [ -f scripts/_include ]; then
-    cp scripts/_include tmp/_include
+rm -f tmp/_include
+if [ -f scripts/_include ]; then
+  cp scripts/_include tmp/_include
+else
+  if [ -f _include ]; then
+    cp _include tmp/_include
   else
-    if [ -f _include ]; then
-      cp _include tmp/_include
-    else
-      curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include -o tmp/_include && chmod +x tmp/_include
-    fi
+    curl -sfL -H 'Cache-Control: no-cache, no-store' https://raw.githubusercontent.com/alrokayan/scripts/main/_include -o tmp/_include && chmod +x tmp/_include
   fi
 fi
+
 if ! [ -f "$ENV_FILE" ]; then touch "$ENV_FILE"; fi
 mkdir -p tmp
 . tmp/_include
