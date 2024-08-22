@@ -6,9 +6,9 @@
 # to you under the Apache License, Version 2.0 (the
 # "License"); you may not use this file except in compliance
 # with the License.  You may obtain a copy of the License at
-#  
+#
 #   http://www.apache.org/licenses/LICENSE-2.0
-# 
+#
 # Unless required by applicable law or agreed to in writing,
 # software distributed under the License is distributed on an
 # "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
@@ -27,8 +27,14 @@
 #######################################
 # EXAMPLE: readVar IP "192.168.1.1" "What's the server IP?" 1 30
 function readVar {
-  if [ "$1" == "" ]; then echo "-- readVar ERROR: arg 1 was not found" ; return 1; fi
-  if [ "$2" == "" ]; then echo "-- readVar ERROR: arg 2 was not found" ; return 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- readVar ERROR: arg 1 was not found"
+    return 1
+  fi
+  if [ "$2" == "" ]; then
+    echo "-- readVar ERROR: arg 2 was not found"
+    return 1
+  fi
   # $1: Variable name
   # $2: Default value
   # $3: Message
@@ -59,8 +65,14 @@ function readVar {
 #######################################
 # EXAMPLE: readYesNoVar L2_SWITCH "y" "Are all nodes connected to a L2 switch? (entre y or n)" 1 30
 function readYesNoVar {
-  if [ "$1" == "" ]; then echo "-- readYesNoVar ERROR: arg 1 was not found" ; exit 1; fi
-  if [ "$2" == "" ]; then echo "-- readYesNoVar ERROR: arg 2 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- readYesNoVar ERROR: arg 1 was not found"
+    exit 1
+  fi
+  if [ "$2" == "" ]; then
+    echo "-- readYesNoVar ERROR: arg 2 was not found"
+    exit 1
+  fi
   # $1: Variable name
   # $2: Default value
   # $3: Message
@@ -101,8 +113,14 @@ function readYesNoVar {
 #######################################
 # EXAMPLE: NODE_ARRAY_DEFAULT="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && readArrayVar NODE_ARRAY "Please entre kubernetes cluster's nodes IP addresses the first one is the master (separate IPs with SPACE)" "$(IFS=' ' ; echo "$NODE_ARRAY_DEFAULT" )"
 function readArrayVar {
-  if [ "$1" == "" ]; then echo "-- readArrayVar ERROR: arg 1 was not found" ; exit 1; fi
-  if [ "$2" == "" ]; then echo "-- readArrayVar ERROR: arg 2 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- readArrayVar ERROR: arg 1 was not found"
+    exit 1
+  fi
+  if [ "$2" == "" ]; then
+    echo "-- readArrayVar ERROR: arg 2 was not found"
+    exit 1
+  fi
   # $1: Variable name
   # $2: Message
   # $4: Default value
@@ -128,14 +146,17 @@ function readArrayVar {
 #######################################
 # EXAMPLE: NEXT_IP 192.168.1.99 1
 function NEXT_IP {
-  if [ "$1" == "" ]; then echo "-- NEXT_IP ERROR: arg 1 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- NEXT_IP ERROR: arg 1 was not found"
+    exit 1
+  fi
   IP="$1"
   for ((i = 0; i <= "$2"; i++)); do
     # shellcheck disable=SC2183
     # shellcheck disable=SC2046
     # shellcheck disable=SC2116
     IP_HEX=$(printf '%.2X%.2X%.2X%.2X\n' $(echo "${IP//./ }"))
-    NEXT_IP_HEX=$(printf %.8X "$(( 0x$IP_HEX + 1 ))")
+    NEXT_IP_HEX=$(printf %.8X "$((0x$IP_HEX + 1))")
     # shellcheck disable=SC2183
     # shellcheck disable=SC2046
     IP=$(printf '%d.%d.%d.%d\n' $(echo "$NEXT_IP_HEX" | sed -r 's/(..)/0x\1 /g'))
@@ -162,7 +183,10 @@ function NEXT_IP {
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && WAIT_ALL_NODES_ONLINE $NODE_ARRAY
 function WAIT_ALL_NODES_ONLINE {
   # $1 Array of servers
-  if [ "$1" == "" ]; then echo "-- WAIT_ALL_NODES_ONLINE ERROR: arg 1 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- WAIT_ALL_NODES_ONLINE ERROR: arg 1 was not found"
+    exit 1
+  fi
   NODE_ARRAY="$1"
   echo "-- Waiting for all nodes to be online"
   for ((i = 0; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
@@ -183,7 +207,10 @@ function WAIT_ALL_NODES_ONLINE {
 # EXAMPLE: NODE_ARRAY="(10.99.0.100 10.99.0.101 10.99.0.102 10.99.0.103)" && IS_ALL_NODES_ONLINE $NODE_ARRAY
 function IS_ALL_NODES_ONLINE {
   # $1 Array of servers
-  if [ "$1" == "" ]; then echo "-- IS_ALL_NODES_ONLINE ERROR: arg 1 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- IS_ALL_NODES_ONLINE ERROR: arg 1 was not found"
+    return 1
+  fi
   export NODE_ARRAY="$1"
   echo "-- Checking if all nodes are online"
   if [[ -z $NODE_ARRAY ]]; then
@@ -209,8 +236,14 @@ function IS_ALL_NODES_ONLINE {
 function RESTART_ALL_NODES {
   # $1 Array of servers
   # $2 Private key path
-  if [ "$1" == "" ]; then echo "-- RESTART_ALL_NODES ERROR: arg 1 was not found" ; exit 1; fi
-  if [ "$2" == "" ]; then echo "-- RESTART_ALL_NODES ERROR: arg 2 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- RESTART_ALL_NODES ERROR: arg 1 was not found"
+    exit 1
+  fi
+  if [ "$2" == "" ]; then
+    echo "-- RESTART_ALL_NODES ERROR: arg 2 was not found"
+    exit 1
+  fi
   NODE_ARRAY="$1"
   PRIVATE_KEY="$2"
   for ((i = 1; i <= ${#NODE_ARRAY[@]} - 1; i++)); do
@@ -233,8 +266,14 @@ function RESTART_ALL_NODES {
 function SSH_COPY_ID {
   # $1 Private key path
   # $2 Array of servers
-  if [ "$1" == "" ]; then echo "-- SSH_COPY_ID ERROR: arg 1 was not found" ; exit 1; fi
-  if [ "$2" == "" ]; then echo "-- SSH_COPY_ID ERROR: arg 2 was not found" ; exit 1; fi
+  if [ "$1" == "" ]; then
+    echo "-- SSH_COPY_ID ERROR: arg 1 was not found"
+    exit 1
+  fi
+  if [ "$2" == "" ]; then
+    echo "-- SSH_COPY_ID ERROR: arg 2 was not found"
+    exit 1
+  fi
   PRIVATE_KEY="$1"
   NODE_ARRAY="$2"
   if [ ! -f "$PRIVATE_KEY" ]; then
