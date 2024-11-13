@@ -806,11 +806,11 @@ WantedBy=multi-user.target
 EOF
 systemctl daemon-reload
 systemctl enable --now kill-failed-pods
-echo "-- Check every 5 min to auto fix DNS"
+echo "-- Check every 2 min to auto fix DNS"
 cat <<'EOF' >/etc/systemd/system/fix-coredns
 #!/bin/bash
 export KUBECONFIG=/etc/kubernetes/admin.conf
-sleep 300
+sleep 120
 while true; do
   if [ "$(kubectl get pods -n kube-system -l k8s-app=kube-dns -ojson | jq '.items[0].status.phase')" != "\"Running\"" ]; then
     kubectl delete pod --selector=k8s-app=kube-dns -n kube-system --force
@@ -867,7 +867,7 @@ resolvConf: /etc/resolv.conf" > '/tmp/kubeletconfiguration0+merge.yaml'
       fi
     fi
   fi
-  sleep 300
+  sleep 120
 done
 EOF
 chmod +x /etc/systemd/system/fix-coredns

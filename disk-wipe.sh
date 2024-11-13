@@ -41,3 +41,9 @@ echo "-- dd $1 to $2"
 sudo dd if="$1" of="$2" bs=4M conv=notrunc,noerror status=progress
 echo "-- unmounting $1/*"
 sudo umount "$1/*"
+
+# download windows 11 iso file then extract it then rename all txr files to remove the unsupported chaaracters burn it to usb
+wget https://software-download.microsoft.com/download/pr/22000.194.210604-1628.co_release_CLIENT_CONSUMER_x64FRE_en-us.iso
+7z x 22000.194.210604-1628.co_release_CLIENT_CONSUMER_x64FRE_en-us.iso
+find . -name "*.txr" -exec rename 's/[^a-zA-Z0-9_.-]//g' {} \;
+sudo dd if=22000.194.210604-1628.co_release_CLIENT_CONSUMER_x64FRE_en-us.iso of=/dev/disk4 bs=4M conv=notrunc,noerror status=progress
