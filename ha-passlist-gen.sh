@@ -24,8 +24,8 @@ if [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "This script will generate passlist for zigbee2mqtt"
     exit 1
 fi
-NODE_RED_PATH="/volume1/data/docker-volumes/node-red/data"
-ZIGBEE2MQTT_PATH="/volume1/data/kube-volumes/zigbee2mqtt"
+NODE_RED_PATH="/host/volume1/data/docker-volumes/node-red/data"
+ZIGBEE2MQTT_PATH="/host/volume1/data/kube-volumes/zigbee2mqtt"
 cd $NODE_RED_PATH || exit
 chmod -R 777 devices
 chown -R "$USER:$USER" devices
