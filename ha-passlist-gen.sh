@@ -136,4 +136,4 @@ sed '/passlist:/q' -i configuration.yaml
 cat $NODE_RED_PATH/devices/majed/c5/all.passlist >> configuration.yaml
 echo "majed's zigbee2mqtt configuration.yaml updated"
 
-rsync --exclude 'log.log' -avz -e $ZIGBEE2MQTT_PATH -e $GFS_FOLDER
+rsync --exclude 'log.log' -avz $ZIGBEE2MQTT_PATH -e $GFS_FOLDER
